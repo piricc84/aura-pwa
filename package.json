@@ -1,0 +1,34 @@
+{
+  "name": "aura-pwa",
+  "version": "3.6.0",
+  "description": "AURA: Guida il tuo respiro con un elfo nella foresta. Privacy-first PWA per il benessere.",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "dev": "python3 -m http.server 8000 --directory src",
+    "serve": "python3 -m http.server 8080 --directory src",
+    "test": "node tests/test.js",
+    "build": "node scripts/build.js",
+    "minify": "node scripts/minify.js",
+    "analyze": "node scripts/analyze.js",
+    "lighthouse": "npm run build && echo 'Run: lighthouse http://localhost:8080'",
+    "clean": "rm -rf dist/",
+    "reset": "rm -rf dist/ .cache/"
+  },
+  "keywords": [
+    "wellness",
+    "mental-health",
+    "pwa",
+    "privacy-first",
+    "meditation",
+    "breathing",
+    "journal",
+    "mood-tracking"
+  ],
+  "author": "Pietro",
+  "license": "MIT",
+  "devDependencies": {},
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}
