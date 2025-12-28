@@ -1,110 +1,93 @@
-import fs from 'fs';
+﻿import fs from 'fs';
 import path from 'path';
+import zlib from 'zlib';
 import { fileURLToPath } from 'url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const iconsDir = path.join(__dirname, '../src/icons');
 
-// Crea directory se non esiste
 if (!fs.existsSync(iconsDir)) {
   fs.mkdirSync(iconsDir, { recursive: true });
 }
 
-// Crea un PNG minimalista usando raw PNG bytes
-// PNG magic: 89 50 4E 47 0D 0A 1A 0A
-// Questo crea un semplice PNG verde 1x1 che scalerà
+const color = { r: 14, g: 42, b: 24 };
 
-function createSimplePNG(width, height, r, g, b) {
-  // Per semplicità, creamo un PNG placeholder solido usando un modulo esterno
-  // Ma possiamo anche usare un base64 PNG embedded di un semplice quadrato
+function crc32(buf) {
+  const table = crc32.table || (crc32.table = (() => {
+    const t = new Uint32Array(256);
+    for (let i = 0; i < 256; i++) {
+      let c = i;
+      for (let k = 0; k < 8; k++) {
+        c = (c & 1) ? (0xedb88320 ^ (c >>> 1)) : (c >>> 1);
+      }
+      t[i] = c >>> 0;
+    }
+    return t;
+  })());
 
-  // SVG a PNG è complesso senza librerie. Usiamo una soluzione alternativa:
-  // Creiamo un PNG molto semplice usando zlib per comprimere i dati raw
-
-  const data = Buffer.alloc(width * height * 4);
-
-  // Riempi il buffer con i colori (RGBA)
-  for (let i = 0; i < width * height; i++) {
-    data[i * 4 + 0] = r;     // R
-    data[i * 4 + 1] = g;     // G
-    data[i * 4 + 2] = b;     // B
-    data[i * 4 + 3] = 255;   // A (opaque)
+  let c = 0xffffffff;
+  for (let i = 0; i < buf.length; i++) {
+    c = table[(c ^ buf[i]) & 0xff] ^ (c >>> 8);
   }
 
-  // Per creare un PNG corretto, avremmo bisogno di zlib
-  // Invece, useremo un approccio semplice: creiamo PNG base64 decodificati
+  return (c ^ 0xffffffff) >>> 0;
+}
 
-  // PNG header
-  const signature = Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]);
+function chunk(type, data) {
+  const len = Buffer.alloc(4);
+  len.writeUInt32BE(data.length, 0);
 
-  // IHDR chunk (13 bytes data)
+  const t = Buffer.from(type, 'ascii');
+  const crcBuf = Buffer.concat([t, data]);
+
+  const crc = Buffer.alloc(4);
+  crc.writeUInt32BE(crc32(crcBuf), 0);
+
+  return Buffer.concat([len, t, data, crc]);
+}
+
+function createPng(width, height, { r, g, b }) {
+  const raw = Buffer.alloc((width * 4 + 1) * height);
+
+  for (let y = 0; y < height; y++) {
+    const rowStart = y * (width * 4 + 1);
+    raw[rowStart] = 0; // filter type None
+
+    for (let x = 0; x < width; x++) {
+      const i = rowStart + 1 + x * 4;
+      raw[i] = r;
+      raw[i + 1] = g;
+      raw[i + 2] = b;
+      raw[i + 3] = 255;
+    }
+  }
+
   const ihdr = Buffer.alloc(13);
   ihdr.writeUInt32BE(width, 0);
   ihdr.writeUInt32BE(height, 4);
   ihdr[8] = 8;  // bit depth
-  ihdr[9] = 6;  // color type (6 = RGBA)
-  ihdr[10] = 0; // compression method
-  ihdr[11] = 0; // filter method
-  ihdr[12] = 0; // interlace method
+  ihdr[9] = 6;  // color type RGBA
+  ihdr[10] = 0; // compression
+  ihdr[11] = 0; // filter
+  ihdr[12] = 0; // interlace
 
-  // Per ora, creiamo un placeholder semplice
-  // Un PNG vero richiederebbe compressione zlib
-  
-  // Usiamo un approccio diverso: base64 di un PNG 1x1 solido
-  // Questo è un PNG verde 1x1:
-  // iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mM8z8DwHwAFBQIAX8jx0gAAAABJRU5ErkJggg==
-  // Ma vogliamo diversi colori e dimensioni.
+  const idat = zlib.deflateSync(raw);
+  const signature = Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]);
 
-  console.log(`  Generazione PNG ${width}x${height} con colore RGB(${r},${g},${b})...`);
-  console.log('  (Using placeholder approach due to zlib dependency)');
-
-  // Per ora, crea un file PNG minimal usando un data URI embedded
-  // In produzione, useremmo 'sharp' o 'canvas'
-  
-  return createMinimalPNG(width, height, r, g, b);
+  return Buffer.concat([
+    signature,
+    chunk('IHDR', ihdr),
+    chunk('IDAT', idat),
+    chunk('IEND', Buffer.alloc(0)),
+  ]);
 }
 
-function createMinimalPNG(width, height, r, g, b) {
-  // Crea un PNG molto semplice manualmente
-  // Questo è un PNG 1x1 pixel verde che useremo come placeholder
-  // e che il browser scalerà automaticamente
-
-  // Per creare un PNG corretto con dimensioni specifiche, avremmo bisogno di:
-  // 1. PNG signature
-  // 2. IHDR (image header)
-  // 3. IDAT (image data compresso con zlib)
-  // 4. IEND (image end)
-
-  // Poiché non abbiamo accesso a zlib nativamente, creiamo un PNG 1x1 e fiducia nel browser
-
-  const pngBase64 = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mM8z8DwHwAFBQIAX8jx0gAAAABJRU5ErkJggg==';
-  
-  // Decoda il base64
-  const pngBuffer = Buffer.from(pngBase64, 'base64');
-
-  // Oppure, crea un PNG usando canvas se disponibile
-  try {
-    const canvas = require('canvas');
-    const canv = new canvas.Canvas(width, height);
-    const ctx = canv.getContext('2d');
-    ctx.fillStyle = `rgb(${r}, ${g}, ${b})`;
-    ctx.fillRect(0, 0, width, height);
-    return canv.toBuffer('image/png');
-  } catch (e) {
-    // canvas non disponibile, ritorna placeholder base64
-    return pngBuffer;
-  }
+function writeIcon(size) {
+  const png = createPng(size, size, color);
+  const dest = path.join(iconsDir, `icon-${size}.png`);
+  fs.writeFileSync(dest, png);
+  console.log(`Created ${dest} (${size}x${size})`);
 }
 
-// Forest green colors: RGB(14, 42, 24)
-const r = 14, g = 42, b = 24;
-
-// Genera icon 192x192
-const icon192 = createSimplePNG(192, 192, r, g, b);
-fs.writeFileSync(path.join(iconsDir, 'icon-192.png'), icon192);
-console.log('✓ Created icons/icon-192.png (192x192)');
-
-// Genera icon 512x512
-const icon512 = createSimplePNG(512, 512, r, g, b);
-fs.writeFileSync(path.join(iconsDir, 'icon-512.png'), icon512);
-console.log('✓ Created icons/icon-512.png (512x512)');
+writeIcon(192);
+writeIcon(512);
