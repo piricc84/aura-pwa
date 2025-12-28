@@ -104,6 +104,87 @@ body {
   }
 }
 
+/* ===== ADVANCED ANIMATIONS ===== */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+@keyframes glow-pulse {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(111, 227, 166, 0.4), 0 0 40px rgba(111, 227, 166, 0.2);
+  }
+  50% {
+    box-shadow: 0 0 30px rgba(111, 227, 166, 0.6), 0 0 60px rgba(111, 227, 166, 0.3);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+@keyframes morphing {
+  0%, 100% {
+    border-radius: 18px;
+  }
+  25% {
+    border-radius: 25px;
+  }
+  50% {
+    border-radius: 18px;
+  }
+  75% {
+    border-radius: 22px;
+  }
+}
+
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes rotate-slow {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
+}
+
+@keyframes ripple {
+  from {
+    box-shadow: 0 0 0 0 rgba(111, 227, 166, 0.7);
+  }
+  to {
+    box-shadow: 0 0 0 10px rgba(111, 227, 166, 0);
+  }
+}
+
 .forest {
   position: absolute;
   left: -10%;
@@ -227,19 +308,26 @@ body {
   width: 40px;
   height: 40px;
   border-radius: 14px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(10px);
   color: var(--text);
-  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.1);
   display: grid;
   place-items: center;
   cursor: pointer;
-  transition: transform 0.12s ease;
+  transition: all 0.2s ease;
   position: relative;
+}
+
+.iconBtn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.2);
 }
 
 .iconBtn:active {
   transform: scale(0.94);
+  background: rgba(255, 255, 255, 0.15);
 }
 
 .dot {
@@ -267,15 +355,17 @@ body {
   flex: 1;
   min-height: 280px;
   border-radius: 24px;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.04));
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.25);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(20px);
+  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.08);
   overflow: hidden;
   position: relative;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   padding: 14px;
+  animation: slide-up 0.6s ease-out;
 }
 
 .heroTop {
@@ -303,6 +393,13 @@ body {
   align-items: center;
   gap: 6px;
   white-space: nowrap;
+  transition: all 0.3s ease;
+  animation: scaleIn 0.4s ease-out;
+}
+
+.streak:hover {
+  background: linear-gradient(135deg, rgba(111, 227, 166, 0.4), rgba(92, 199, 255, 0.3));
+  box-shadow: 0 0 0 2px rgba(111, 227, 166, 0.2);
 }
 
 .scene {
@@ -567,14 +664,16 @@ body {
   bottom: 0;
   max-width: 520px;
   margin: 0 auto;
-  background: var(--bg1);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: linear-gradient(180deg, var(--bg1), rgba(14, 42, 24, 0.95));
+  border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 28px 28px 0 0;
+  backdrop-filter: blur(20px);
   padding: 20px 16px 30px;
   z-index: 101;
   animation: slideUp 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
   max-height: 85vh;
   overflow-y: auto;
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
 @keyframes slideUp {
@@ -586,24 +685,79 @@ body {
   }
 }
 
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Bottoni selezionabili (mood, temi, etc) */
+[data-mood],
+[data-theme] {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: scaleIn 0.3s ease-out backwards;
+}
+
+[data-mood]:hover,
+[data-theme]:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(111, 227, 166, 0.2);
+}
+
+[data-mood]:active,
+[data-theme]:active {
+  transform: scale(0.96);
+}
+
 input,
-select {
+select,
+textarea {
   width: 100%;
   padding: 12px 14px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(10px);
   border-radius: 12px;
   color: var(--text);
   font-size: 14px;
   font-family: inherit;
-  transition: border-color 0.2s ease;
+  transition: all 0.2s ease;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+input:hover,
+select:hover,
+textarea:hover {
+  border-color: rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.11);
 }
 
 input:focus,
-select:focus {
+select:focus,
+textarea:focus {
   outline: none;
   border-color: var(--accent);
-  background: rgba(255, 255, 255, 0.09);
+  background: rgba(255, 255, 255, 0.12);
+  box-shadow: 0 0 0 2px rgba(111, 227, 166, 0.2), inset 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+textarea {
+  resize: vertical;
+  min-height: 100px;
 }
 
 button {
@@ -614,11 +768,18 @@ button {
   font-size: 14px;
   padding: 10px 16px;
   border-radius: 12px;
+  position: relative;
+  overflow: hidden;
 }
 
 button.primary {
   background: linear-gradient(135deg, var(--accent), rgba(111, 227, 166, 0.7));
   color: var(--bg0);
+}
+
+button.primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(111, 227, 166, 0.3);
 }
 
 button.primary:active {
@@ -629,10 +790,51 @@ button.ghost {
   border: 1px solid rgba(255, 255, 255, 0.14);
   background: rgba(255, 255, 255, 0.06);
   color: var(--text);
+  backdrop-filter: blur(8px);
+}
+
+button.ghost:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.2);
 }
 
 button.ghost:active {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.15);
+  transform: scale(0.96);
+}
+
+/* Button with class 'btn' */
+.btn {
+  background: linear-gradient(135deg, rgba(111, 227, 166, 0.85), rgba(92, 199, 255, 0.65));
+  color: var(--bg0);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 8px 20px rgba(111, 227, 166, 0.2);
+  padding: 12px 16px;
+  font-size: 14px;
+  font-weight: 800;
+  border-radius: 14px;
+}
+
+.btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 28px rgba(111, 227, 166, 0.35);
+}
+
+.btn:active {
+  transform: scale(0.96) translateY(-1px);
+}
+
+.buttonRow {
+  display: flex;
+  gap: 10px;
+  padding: 0 14px;
+}
+
+/* Loading state indicator */
+button.loading {
+  pointer-events: none;
+  opacity: 0.7;
+  animation: pulse 1.5s ease-in-out infinite;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -641,6 +843,65 @@ button.ghost:active {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
+}
+
+/* ===== THEME: OCEAN ===== */
+body.theme-ocean {
+  background: radial-gradient(1200px 700px at 50% -10%, rgba(65, 176, 222, 0.15), transparent 55%),
+    radial-gradient(900px 700px at 90% 30%, rgba(52, 211, 153, 0.12), transparent 55%),
+    linear-gradient(180deg, #0a1f2e, #0d2a3f 35%, #0f3a52);
+}
+
+body.theme-ocean {
+  --bg0: #0a1f2e;
+  --bg1: #0d2a3f;
+  --bg2: #0f3a52;
+  --bg3: #134361;
+  --accent: #34d399;
+  --accent2: #41b0de;
+  --gold: #60a5fa;
+}
+
+/* ===== THEME: MOUNTAIN ===== */
+body.theme-mountain {
+  background: radial-gradient(1200px 700px at 50% -10%, rgba(192, 132, 250, 0.15), transparent 55%),
+    radial-gradient(900px 700px at 90% 30%, rgba(244, 167, 91, 0.12), transparent 55%),
+    linear-gradient(180deg, #1f1b2e, #2d1d3d 35%, #3d2557);
+}
+
+body.theme-mountain {
+  --bg0: #1f1b2e;
+  --bg1: #2d1d3d;
+  --bg2: #3d2557;
+  --bg3: #4a3166;
+  --accent: #f4a75b;
+  --accent2: #c084fa;
+  --gold: #fbbf24;
+}
+
+/* ===== THEME: AURORA ===== */
+body.theme-aurora {
+  background: radial-gradient(1200px 700px at 50% -10%, rgba(168, 85, 247, 0.2), transparent 55%),
+    radial-gradient(900px 700px at 90% 30%, rgba(236, 72, 153, 0.15), transparent 55%),
+    linear-gradient(180deg, #0f172a, #1a1a4d 35%, #2d1b4e);
+}
+
+body.theme-aurora {
+  --bg0: #0f172a;
+  --bg1: #1a1a4d;
+  --bg2: #2d1b4e;
+  --bg3: #3d2563;
+  --accent: #a855f7;
+  --accent2: #ec4899;
+  --gold: #f0abfc;
+}
+
+/* ===== THEME: NIGHT (ENHANCED) ===== */
+body.theme-night {
+  --bg0: #0a0e27;
+  --bg1: #0f1640;
+  --bg2: #1a2555;
+  --bg3: #253570;
 }
 
 @media (prefers-color-scheme: light) {
