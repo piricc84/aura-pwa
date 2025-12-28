@@ -266,7 +266,7 @@
     if (!AC) return null;
     audio.ctx = new AC();
     audio.master = audio.ctx.createGain();
-    audio.master.gain.value = 0.0001;
+    audio.master.gain.value = 0.12; // Volume default più alto (era 0.0001)
     audio.master.connect(audio.ctx.destination);
     return audio.ctx;
   }
@@ -282,7 +282,7 @@
     o.frequency.setValueAtTime(740, t);
     o.frequency.exponentialRampToValueAtTime(420, t + 0.07);
     g.gain.setValueAtTime(0.0001, t);
-    g.gain.exponentialRampToValueAtTime(0.05, t + 0.01);
+    g.gain.exponentialRampToValueAtTime(0.12, t + 0.01); // Aumentato da 0.05
     g.gain.exponentialRampToValueAtTime(0.0001, t + 0.14);
     o.connect(g);
     g.connect(audio.master || ctx.destination);
@@ -301,7 +301,7 @@
     o.frequency.setValueAtTime(880, t);
     o.frequency.exponentialRampToValueAtTime(1100, t + 0.1);
     g.gain.setValueAtTime(0.0001, t);
-    g.gain.exponentialRampToValueAtTime(0.06, t + 0.02);
+    g.gain.exponentialRampToValueAtTime(0.14, t + 0.02); // Aumentato da 0.06
     g.gain.exponentialRampToValueAtTime(0.0001, t + 0.18);
     o.connect(g);
     g.connect(audio.master || ctx.destination);
@@ -321,7 +321,7 @@
       o.frequency.value = 620 + i * 150;
       const startTime = t + i * 0.12;
       g.gain.setValueAtTime(0.0001, startTime);
-      g.gain.exponentialRampToValueAtTime(0.04, startTime + 0.01);
+      g.gain.exponentialRampToValueAtTime(0.10, startTime + 0.01); // Aumentato da 0.04
       g.gain.exponentialRampToValueAtTime(0.0001, startTime + 0.1);
       o.connect(g);
       g.connect(audio.master || ctx.destination);
@@ -345,14 +345,14 @@
     lp.type = 'lowpass';
     // Configurazione per diversi ambienti
     const envConfig = {
-      forest: { lpFreq: 950, nsGain: 0.16, base: 207.65, lfoVal: 5 },
-      rain: { lpFreq: 850, nsGain: 0.28, base: 196, lfoVal: 9 },
-      river: { lpFreq: 1700, nsGain: 0.22, base: 220, lfoVal: 5 },
-      night: { lpFreq: 1100, nsGain: 0.16, base: 196, lfoVal: 5 },
-      ocean: { lpFreq: 780, nsGain: 0.25, base: 185, lfoVal: 4 },
-      thunderstorm: { lpFreq: 650, nsGain: 0.35, base: 164, lfoVal: 12 },
-      mountain: { lpFreq: 920, nsGain: 0.19, base: 233, lfoVal: 6 },
-      insects: { lpFreq: 1400, nsGain: 0.12, base: 261.6, lfoVal: 8 },
+      forest: { lpFreq: 950, nsGain: 0.22, base: 207.65, lfoVal: 5 },
+      rain: { lpFreq: 850, nsGain: 0.32, base: 196, lfoVal: 9 },
+      river: { lpFreq: 1700, nsGain: 0.28, base: 220, lfoVal: 5 },
+      night: { lpFreq: 1100, nsGain: 0.22, base: 196, lfoVal: 5 },
+      ocean: { lpFreq: 780, nsGain: 0.28, base: 185, lfoVal: 4 },
+      thunderstorm: { lpFreq: 650, nsGain: 0.38, base: 164, lfoVal: 12 },
+      mountain: { lpFreq: 920, nsGain: 0.24, base: 233, lfoVal: 6 },
+      insects: { lpFreq: 1400, nsGain: 0.18, base: 261.6, lfoVal: 8 },
     };
     const config = envConfig[env] || envConfig.forest;
     lp.frequency.value = config.lpFreq;
