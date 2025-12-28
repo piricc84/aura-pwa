@@ -1,0 +1,12 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"name": "aura",
+			"path": "../aura"
+		}
+	],
+	"settings": {}
+}

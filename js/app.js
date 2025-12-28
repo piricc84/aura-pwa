@@ -1308,7 +1308,7 @@
     // Swipe down to close modal or audio panel
     if (deltaY > 80) {
       const modal = $('modal');
-      if (modal && modal.classList.contains('show')) {
+      if (modal && modal.style.display === 'flex') {
         closeModal(false);
         vibrateDouble();
         return;

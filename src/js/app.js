@@ -13,6 +13,23 @@
     } catch (e) {}
   }
 
+  // Haptic patterns per diverse situazioni
+  function vibratePulse() {
+    safeVibrate([8, 6, 8]);
+  }
+
+  function vibrateSuccess() {
+    safeVibrate([12, 20, 8, 10]);
+  }
+
+  function vibrateWarning() {
+    safeVibrate([30, 15, 30]);
+  }
+
+  function vibrateDouble() {
+    safeVibrate([10, 8, 10]);
+  }
+
   function toast(msg) {
     const t = document.createElement('div');
     t.textContent = msg;
@@ -203,6 +220,33 @@
       '--g2': 'rgba(255,208,122,.80)',
       '--gold': 'rgba(255,224,163,.92)',
     },
+    ocean: {
+      '--bg0': '#0a1f2e',
+      '--bg1': '#0d2a3f',
+      '--bg2': '#0f3a52',
+      '--bg3': '#134361',
+      '--g1': 'rgba(52,211,153,.95)',
+      '--g2': 'rgba(65,176,222,.80)',
+      '--gold': 'rgba(96,165,250,.92)',
+    },
+    mountain: {
+      '--bg0': '#1f1b2e',
+      '--bg1': '#2d1d3d',
+      '--bg2': '#3d2557',
+      '--bg3': '#4a3166',
+      '--g1': 'rgba(244,167,91,.95)',
+      '--g2': 'rgba(192,132,250,.80)',
+      '--gold': 'rgba(251,191,36,.92)',
+    },
+    aurora: {
+      '--bg0': '#0f172a',
+      '--bg1': '#1a1a4d',
+      '--bg2': '#2d1b4e',
+      '--bg3': '#3d2563',
+      '--g1': 'rgba(168,85,247,.95)',
+      '--g2': 'rgba(236,72,153,.80)',
+      '--gold': 'rgba(240,171,252,.92)',
+    },
   };
 
   function applyTheme() {
@@ -210,6 +254,7 @@
     state.theme = t;
     const root = document.documentElement;
     Object.entries(themes[t]).forEach(([k, v]) => root.style.setProperty(k, v));
+    document.body.className = `theme-${t}`;
   }
 
   // ===== AUDIO =====
@@ -221,7 +266,7 @@
     if (!AC) return null;
     audio.ctx = new AC();
     audio.master = audio.ctx.createGain();
-    audio.master.gain.value = 0.0001;
+    audio.master.gain.value = 0.12; // Volume default più alto (era 0.0001)
     audio.master.connect(audio.ctx.destination);
     return audio.ctx;
   }
@@ -237,12 +282,52 @@
     o.frequency.setValueAtTime(740, t);
     o.frequency.exponentialRampToValueAtTime(420, t + 0.07);
     g.gain.setValueAtTime(0.0001, t);
-    g.gain.exponentialRampToValueAtTime(0.05, t + 0.01);
+    g.gain.exponentialRampToValueAtTime(0.12, t + 0.01); // Aumentato da 0.05
     g.gain.exponentialRampToValueAtTime(0.0001, t + 0.14);
     o.connect(g);
     g.connect(audio.master || ctx.destination);
     o.start(t);
     o.stop(t + 0.16);
+  }
+
+  function successBeep() {
+    if (!state.soundEnabled) return;
+    const ctx = ensureAudioCtx();
+    if (!ctx) return;
+    const t = ctx.currentTime;
+    const o = ctx.createOscillator();
+    const g = ctx.createGain();
+    o.type = 'sine';
+    o.frequency.setValueAtTime(880, t);
+    o.frequency.exponentialRampToValueAtTime(1100, t + 0.1);
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(0.14, t + 0.02); // Aumentato da 0.06
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 0.18);
+    o.connect(g);
+    g.connect(audio.master || ctx.destination);
+    o.start(t);
+    o.stop(t + 0.2);
+  }
+
+  function doubleBeep() {
+    if (!state.soundEnabled) return;
+    const ctx = ensureAudioCtx();
+    if (!ctx) return;
+    const t = ctx.currentTime;
+    for (let i = 0; i < 2; i++) {
+      const o = ctx.createOscillator();
+      const g = ctx.createGain();
+      o.type = 'sine';
+      o.frequency.value = 620 + i * 150;
+      const startTime = t + i * 0.12;
+      g.gain.setValueAtTime(0.0001, startTime);
+      g.gain.exponentialRampToValueAtTime(0.10, startTime + 0.01); // Aumentato da 0.04
+      g.gain.exponentialRampToValueAtTime(0.0001, startTime + 0.1);
+      o.connect(g);
+      g.connect(audio.master || ctx.destination);
+      o.start(startTime);
+      o.stop(startTime + 0.12);
+    }
   }
 
   function buildAmbience(ctx, env) {
@@ -258,14 +343,26 @@
     ns.loop = true;
     const lp = ctx.createBiquadFilter();
     lp.type = 'lowpass';
-    lp.frequency.value = env === 'night' ? 1100 : env === 'river' ? 1700 : 950;
+    // Configurazione per diversi ambienti
+    const envConfig = {
+      forest: { lpFreq: 950, nsGain: 0.22, base: 207.65, lfoVal: 5 },
+      rain: { lpFreq: 850, nsGain: 0.32, base: 196, lfoVal: 9 },
+      river: { lpFreq: 1700, nsGain: 0.28, base: 220, lfoVal: 5 },
+      night: { lpFreq: 1100, nsGain: 0.22, base: 196, lfoVal: 5 },
+      ocean: { lpFreq: 780, nsGain: 0.28, base: 185, lfoVal: 4 },
+      thunderstorm: { lpFreq: 650, nsGain: 0.38, base: 164, lfoVal: 12 },
+      mountain: { lpFreq: 920, nsGain: 0.24, base: 233, lfoVal: 6 },
+      insects: { lpFreq: 1400, nsGain: 0.18, base: 261.6, lfoVal: 8 },
+    };
+    const config = envConfig[env] || envConfig.forest;
+    lp.frequency.value = config.lpFreq;
     lp.Q.value = 0.65;
     const nsGain = ctx.createGain();
-    nsGain.gain.value = env === 'rain' ? 0.28 : env === 'river' ? 0.22 : 0.16;
+    nsGain.gain.value = config.nsGain;
     ns.connect(lp);
     lp.connect(nsGain);
     nsGain.connect(g);
-    const base = env === 'night' ? 196 : env === 'river' ? 220 : 207.65;
+    const base = config.base;
     const o1 = ctx.createOscillator();
     o1.type = 'sine';
     o1.frequency.value = base;
@@ -289,7 +386,7 @@
     lfo.type = 'sine';
     lfo.frequency.value = 0.08;
     const lfoGain = ctx.createGain();
-    lfoGain.gain.value = env === 'rain' ? 9 : 5;
+    lfoGain.gain.value = config.lfoVal;
     lfo.connect(lfoGain);
     lfoGain.connect(o1.frequency);
     const t = ctx.currentTime;
@@ -558,7 +655,8 @@
     else state.moods.push(entry);
     state.moods = state.moods.slice(-400);
     await saveState();
-    safeVibrate(10);
+    vibrateSuccess();
+    successBeep();
     toast('Salvato ✅');
     render();
   }
@@ -657,6 +755,8 @@
     else state.journal.push({ date: todayKey(), t: Date.now(), text });
     state.journal = state.journal.slice(-180);
     await saveState();
+    vibrateSuccess();
+    successBeep();
     toast('Salvato ✅');
   }
 
@@ -719,17 +819,19 @@
     const html = `
       <div style="background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.1); border-radius:12px; padding:12px; margin-bottom:12px">
         <div style="font-weight:700; margin-bottom:10px">Tema</div>
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px">
+        <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px">
           <button class="ghost" data-theme="forest" style="padding:12px">🌲 Foresta</button>
           <button class="ghost" data-theme="night" style="padding:12px">🌙 Notte</button>
           <button class="ghost" data-theme="dawn" style="padding:12px">🌅 Alba</button>
-          <button class="ghost" id="sLogout" style="padding:12px">🚪 Logout</button>
+          <button class="ghost" data-theme="ocean" style="padding:12px">🌊 Oceano</button>
+          <button class="ghost" data-theme="mountain" style="padding:12px">⛰️ Montagna</button>
+          <button class="ghost" data-theme="aurora" style="padding:12px">🌌 Aurora</button>
         </div>
       </div>
       <div style="background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.1); border-radius:12px; padding:12px; margin-bottom:12px">
-        <div style="font-weight:700; margin-bottom:10px">Feedback</div>
+        <div style="font-weight:700; margin-bottom:10px">Azioni</div>
         <div style="display:flex; gap:10px">
-          <button class="ghost" id="sHaptics" style="flex:1; padding:12px">${state.haptics ? '📳 Haptics ON' : '📳 Haptics OFF'}</button>
+          <button class="ghost" id="sLogout" style="flex:1; padding:12px">🚪 Logout</button>
           <button class="ghost" id="sSound" style="flex:1; padding:12px">${state.soundEnabled ? '🔔 Audio ON' : '🔕 Audio OFF'}</button>
         </div>
         <div style="font-size:12px; color:var(--dim); margin-top:10px">Su iPhone la vibrazione può essere limitata da iOS.</div>
@@ -846,6 +948,9 @@
       state.lockEnabled = true;
       setPinMeta({ enabled: true, hash: await pinHash(p1) });
       await saveState();
+      vibrateSuccess();
+      successBeep();
+      doubleBeep();
       toast('PIN impostato ✅');
       render();
     });
@@ -1028,6 +1133,8 @@
         audio.vol = state.audio?.vol ?? 0.4;
         const lock = $('lock');
         if (lock) lock.style.display = 'none';
+        vibrateSuccess();
+        successBeep();
         toast('Sbloccato ✅');
         render();
       } catch (e) {
@@ -1072,7 +1179,7 @@
   // ===== EVENT LISTENERS =====
   $('elfWrap')?.addEventListener('click', () => {
     softClick();
-    safeVibrate(12);
+    vibratePulse();
     const elf = $('elfWrap');
     if (elf) {
       elf.classList.add('happy');
@@ -1181,6 +1288,39 @@
 
   setTime();
   setInterval(setTime, 15000);
+
+  // ===== TOUCH GESTURES =====
+  let touchStartY = 0;
+  let touchStartX = 0;
+
+  document.addEventListener('touchstart', (e) => {
+    touchStartY = e.touches[0].clientY;
+    touchStartX = e.touches[0].clientX;
+  }, { passive: true });
+
+  document.addEventListener('touchend', (e) => {
+    if (!e.changedTouches || e.changedTouches.length === 0) return;
+    const touchEndY = e.changedTouches[0].clientY;
+    const touchEndX = e.changedTouches[0].clientX;
+    const deltaY = touchEndY - touchStartY;
+    const deltaX = touchEndX - touchStartX;
+
+    // Swipe down to close modal or audio panel
+    if (deltaY > 80) {
+      const modal = $('modal');
+      if (modal && modal.style.display === 'flex') {
+        closeModal(false);
+        vibrateDouble();
+        return;
+      }
+      const audioPanel = $('audioPanel');
+      if (audioPanel && audioPanel.classList.contains('open')) {
+        audioPanel.classList.remove('open');
+        softClick();
+        vibrateDouble();
+      }
+    }
+  }, { passive: true });
 
   // ===== BOOT =====
   async function boot() {
