@@ -353,7 +353,8 @@
 
   function buildAmbience(ctx, env) {
     const g = ctx.createGain();
-    g.gain.value = 0.0001;
+    const t = ctx.currentTime;
+    g.gain.setValueAtTime(0.0001, t);
     g.connect(audio.master);
     const noiseLen = ctx.sampleRate * 2;
     const buf = ctx.createBuffer(1, noiseLen, ctx.sampleRate);
@@ -366,16 +367,17 @@
     lp.type = 'lowpass';
     // Configurazione per diversi ambienti
     const envConfig = {
-      forest: { lpFreq: 950, nsGain: 0.22, base: 207.65, lfoVal: 5 },
-      rain: { lpFreq: 850, nsGain: 0.32, base: 196, lfoVal: 9 },
-      river: { lpFreq: 1700, nsGain: 0.28, base: 220, lfoVal: 5 },
-      night: { lpFreq: 1100, nsGain: 0.22, base: 196, lfoVal: 5 },
-      ocean: { lpFreq: 780, nsGain: 0.28, base: 185, lfoVal: 4 },
-      thunderstorm: { lpFreq: 650, nsGain: 0.38, base: 164, lfoVal: 12 },
-      mountain: { lpFreq: 920, nsGain: 0.24, base: 233, lfoVal: 6 },
-      insects: { lpFreq: 1400, nsGain: 0.18, base: 261.6, lfoVal: 8 },
+      forest: { lpFreq: 950, nsGain: 0.22, base: 207.65, lfoVal: 5, mix: 0.48 },
+      rain: { lpFreq: 850, nsGain: 0.32, base: 196, lfoVal: 9, mix: 0.6 },
+      river: { lpFreq: 1700, nsGain: 0.28, base: 220, lfoVal: 5, mix: 0.52 },
+      night: { lpFreq: 1100, nsGain: 0.22, base: 196, lfoVal: 5, mix: 0.45 },
+      ocean: { lpFreq: 780, nsGain: 0.28, base: 185, lfoVal: 4, mix: 0.62 },
+      thunderstorm: { lpFreq: 650, nsGain: 0.38, base: 164, lfoVal: 12, mix: 0.68 },
+      mountain: { lpFreq: 920, nsGain: 0.24, base: 233, lfoVal: 6, mix: 0.5 },
+      insects: { lpFreq: 1400, nsGain: 0.18, base: 261.6, lfoVal: 8, mix: 0.46 },
     };
     const config = envConfig[env] || envConfig.forest;
+    g.gain.exponentialRampToValueAtTime(config.mix, t + 0.65);
     lp.frequency.value = config.lpFreq;
     lp.Q.value = 0.65;
     const nsGain = ctx.createGain();

@@ -28,6 +28,8 @@ body {
 
 body {
   margin: 0;
+  min-height: 100vh;
+  min-height: 100svh;
   padding-top: env(safe-area-inset-top);
   padding-bottom: env(safe-area-inset-bottom);
   font-family: "DM Sans", system-ui, -apple-system, Segoe UI, Roboto, Arial;
@@ -46,7 +48,9 @@ body {
   max-width: 520px;
   margin: 0 auto;
   height: 100%;
+  min-height: calc(100svh - env(safe-area-inset-top) - env(safe-area-inset-bottom));
   position: relative;
+  padding: 0 max(12px, env(safe-area-inset-left)) max(12px, env(safe-area-inset-bottom));
 }
 
 .sky {
@@ -342,6 +346,33 @@ body {
   }
 }
 
+.staff {
+  position: absolute;
+  left: 26px;
+  bottom: 2px;
+  width: 12px;
+  height: 136px;
+  background: linear-gradient(180deg, rgba(240, 208, 138, 0.5), rgba(92, 199, 255, 0.4));
+  border-radius: 12px;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.35);
+  transform: rotate(-6deg);
+  opacity: 0.9;
+  z-index: 0;
+}
+
+.staff::after {
+  content: "";
+  position: absolute;
+  top: -16px;
+  left: -8px;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(111, 227, 166, 0.95), rgba(92, 199, 255, 0.4));
+  box-shadow: 0 0 22px rgba(111, 227, 166, 0.6);
+  animation: pulseSoft 3.4s ease-in-out infinite;
+}
+
 .elf {
   width: 120px;
   height: 140px;
@@ -349,6 +380,7 @@ body {
   transform-origin: 50% 90%;
   animation: float 5.8s ease-in-out infinite;
   filter: drop-shadow(0 18px 28px rgba(0, 0, 0, 0.35));
+  z-index: 1;
 }
 
 @keyframes float {
@@ -358,6 +390,32 @@ body {
   }
   50% {
     transform: translateY(-8px);
+  }
+}
+
+.cloak {
+  position: absolute;
+  top: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 126px;
+  height: 116px;
+  background: linear-gradient(180deg, rgba(92, 199, 255, 0.18), rgba(111, 227, 166, 0.16));
+  border-radius: 72px 72px 18px 18px;
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.25);
+  z-index: 0;
+  animation: sway 6.4s ease-in-out infinite;
+}
+
+@keyframes sway {
+  0% {
+    transform: translateX(-50%) rotate(-3deg);
+  }
+  50% {
+    transform: translateX(-50%) rotate(3deg);
+  }
+  100% {
+    transform: translateX(-50%) rotate(-3deg);
   }
 }
 
@@ -372,6 +430,7 @@ body {
   border-radius: 80px 80px 18px 18px;
   clip-path: polygon(10% 82%, 30% 10%, 62% 18%, 88% 82%, 70% 100%, 50% 92%, 30% 100%);
   border: 1px solid rgba(255, 255, 255, 0.18);
+  z-index: 3;
 }
 
 .hat::after {
@@ -398,6 +457,7 @@ body {
   border-radius: 44px 44px 40px 40px;
   border: 1px solid rgba(0, 0, 0, 0.18);
   overflow: hidden;
+  z-index: 2;
 }
 
 .ear {
@@ -470,6 +530,31 @@ body {
   height: 2px;
   background: rgba(0, 0, 0, 0.35);
   border-radius: 99px;
+}
+
+.pendant {
+  position: absolute;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 18px;
+  height: 18px;
+  background: radial-gradient(circle, rgba(92, 199, 255, 0.9), rgba(92, 199, 255, 0.45));
+  border-radius: 50%;
+  box-shadow: 0 0 12px rgba(92, 199, 255, 0.7);
+  animation: pulseSoft 2.8s ease-in-out infinite;
+}
+
+@keyframes pulseSoft {
+  0%,
+  100% {
+    transform: translateX(-50%) scale(0.96);
+    opacity: 0.9;
+  }
+  50% {
+    transform: translateX(-50%) scale(1.05);
+    opacity: 1;
+  }
 }
 
 .elfWrap.happy .eye {
@@ -633,6 +718,35 @@ button.ghost {
 
 button.ghost:active {
   background: rgba(255, 255, 255, 0.1);
+}
+
+@media (max-width: 430px) {
+  body {
+    background-position: center top;
+  }
+
+  #app {
+    max-width: 100%;
+    padding-inline: max(10px, env(safe-area-inset-left));
+  }
+
+  .scene {
+    padding: 2px 0 8px;
+  }
+
+  .elfWrap {
+    width: 190px;
+    height: 190px;
+  }
+
+  .glow {
+    width: 210px;
+    height: 210px;
+  }
+
+  .buttonRow {
+    padding: 0 10px 12px;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
