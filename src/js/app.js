@@ -49,6 +49,59 @@
     setTimeout(() => t.remove(), 2000);
   }
 
+  function downloadBlob(blob, filename) {
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 800);
+  }
+
+  function fmtDateShort(d) {
+    const dt = new Date(d);
+    return dt.toISOString().slice(0, 10);
+  }
+
+  function pdfEscape(text) {
+    return text.replace(/\\/g, '\\\\').replace(/\(/g, '\\(').replace(/\)/g, '\\)');
+  }
+
+  function buildSimplePdf(lines) {
+    const content = lines
+      .map((line, i) => `BT /F1 12 Tf 50 ${770 - i * 16} Td (${pdfEscape(line)}) Tj ET`)
+      .join('\n');
+    const objects = [];
+    objects.push('1 0 obj<< /Type /Catalog /Pages 2 0 R >>endobj');
+    objects.push('2 0 obj<< /Type /Pages /Kids [3 0 R] /Count 1 >>endobj');
+    objects.push('3 0 obj<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Contents 5 0 R /Resources << /Font << /F1 4 0 R >> >> >>endobj');
+    objects.push('4 0 obj<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>endobj');
+    objects.push(`5 0 obj<< /Length ${content.length} >>stream\n${content}\nendstream\nendobj`);
+    let offset = 0;
+    const parts = ['%PDF-1.4'];
+    const xref = ['xref', `0 ${objects.length + 1}`, '0000000000 65535 f '];
+    parts.forEach((p) => (offset += p.length + 1));
+    objects.forEach((obj) => {
+      xref.push(String(offset).padStart(10, '0') + ' 00000 n ');
+      parts.push(obj);
+      offset += obj.length + 1;
+    });
+    const xrefOffset = offset;
+    parts.push(xref.join('\n'));
+    parts.push(`trailer<< /Size ${objects.length + 1} /Root 1 0 R >>`);
+    parts.push(`startxref\n${xrefOffset}\n%%EOF`);
+    return parts.join('\n');
+  }
+
+  function parseSteps(input) {
+    return (input || '')
+      .split(',')
+      .map((s) => s.trim())
+      .filter(Boolean)
+      .slice(0, 6);
+  }
+
   // ===== STATE & STORAGE =====
   const USERS_KEY = 'aura_users_v360';
   const CURR_KEY = 'aura_current_user_v360';
@@ -67,6 +120,12 @@
     haptics: true,
     pinEnabled: false,
     lockEnabled: false,
+    remindersEnabled: false,
+    routines: {
+      morning: { enabled: true, time: '08:30', steps: ['Respiro', 'Umore', 'Intenzione'], lastDone: '' },
+      evening: { enabled: true, time: '21:30', steps: ['Diario', 'Gratitudine', 'Chiudi la giornata'], lastDone: '' },
+      lastReminder: { morning: '', evening: '' },
+    },
     audio: { env: 'forest', vol: 0.4, on: false },
     moods: [],
     journal: [],
@@ -189,6 +248,17 @@
       return await decryptJSON(parsed, sessionPin);
     }
     return parsed || defaultState();
+  }
+
+  function normalizeState(s) {
+    const base = defaultState();
+    const merged = { ...base, ...s };
+    merged.audio = { ...base.audio, ...(s?.audio || {}) };
+    merged.routines = { ...base.routines, ...(s?.routines || {}) };
+    merged.routines.morning = { ...base.routines.morning, ...(s?.routines?.morning || {}) };
+    merged.routines.evening = { ...base.routines.evening, ...(s?.routines?.evening || {}) };
+    merged.routines.lastReminder = { ...base.routines.lastReminder, ...(s?.routines?.lastReminder || {}) };
+    return merged;
   }
 
   // ===== THEMES =====
@@ -525,6 +595,65 @@
     '"Oggi scegli morbidezza."',
   ];
   const moodLabels = { calm: 'Calmo', tense: 'Teso', tired: 'Stanco', down: 'Giu' };
+  const moodTags = [
+    'sonno',
+    'stress',
+    'lavoro',
+    'relazioni',
+    'salute',
+    'energia',
+    'calma',
+    'ansia',
+    'focalizzazione',
+    'gratitudine',
+  ];
+
+  let breathTimer = null;
+  let breathEndsAt = 0;
+  let breathDuration = 180;
+
+  function stopBreathTimer() {
+    if (breathTimer) clearInterval(breathTimer);
+    breathTimer = null;
+    breathEndsAt = 0;
+  }
+
+  function updateBreathTimerUI() {
+    const timerEl = modal?.querySelector('#breathTimer');
+    const phaseEl = modal?.querySelector('#breathPhase');
+    if (!timerEl || !phaseEl) return;
+    if (!breathEndsAt) {
+      timerEl.textContent = `${String(Math.floor(breathDuration / 60)).padStart(2, '0')}:${String(
+        breathDuration % 60
+      ).padStart(2, '0')}`;
+      phaseEl.textContent = 'Pronto';
+      return;
+    }
+    const remaining = Math.max(0, Math.ceil((breathEndsAt - Date.now()) / 1000));
+    const mins = Math.floor(remaining / 60);
+    const secs = remaining % 60;
+    timerEl.textContent = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+    const elapsed = breathDuration - remaining;
+    const phase = elapsed % 12;
+    if (phase < 4) phaseEl.textContent = 'Inspira';
+    else if (phase < 6) phaseEl.textContent = 'Pausa';
+    else phaseEl.textContent = 'Espira';
+    if (remaining === 0) {
+      stopBreathTimer();
+      phaseEl.textContent = 'Sessione completata';
+      vibrateSuccess();
+      successBeep();
+      toast('Respiro completato');
+    }
+  }
+
+  function startBreathTimer(durationSec) {
+    stopBreathTimer();
+    breathDuration = durationSec;
+    breathEndsAt = Date.now() + durationSec * 1000;
+    updateBreathTimerUI();
+    breathTimer = setInterval(updateBreathTimerUI, 250);
+  }
 
   // ===== RENDER =====
   function setTime() {
@@ -641,12 +770,19 @@
     const current = tm ? tm.mood : null;
     const currentLabel = current ? moodLabels[current] || current : null;
     let picked = current || 'calm';
+    const selectedTags = new Set((tm?.tags || []).filter(Boolean));
     const html = `
       <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:12px">
         <button class="ghost" data-mood="calm" style="padding:12px">Calmo</button>
         <button class="ghost" data-mood="tense" style="padding:12px">Teso</button>
         <button class="ghost" data-mood="tired" style="padding:12px">Stanco</button>
         <button class="ghost" data-mood="down" style="padding:12px">Giu</button>
+      </div>
+      <div style="margin-bottom:12px">
+        <div style="font-size:14px; color:var(--dim); margin-bottom:8px">Tag rapidi</div>
+        <div class="chipRow">
+          ${moodTags.map((tag) => `<button class="chip" data-tag="${tag}">${tag}</button>`).join('')}
+        </div>
       </div>
       <div style="margin-bottom:12px; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.1); border-radius:12px; padding:12px">
         <div style="font-weight:700; margin-bottom:8px">Energia (0-100)</div>
@@ -676,13 +812,20 @@
       cancelText: 'Annulla',
     });
     const buttons = [...(modal?.querySelectorAll('[data-mood]') || [])];
+    const tagButtons = [...(modal?.querySelectorAll('[data-tag]') || [])];
     const paint = () =>
       buttons.forEach((b) => {
         const on = b.getAttribute('data-mood') === picked;
         b.style.borderColor = on ? 'rgba(111,227,166,.7)' : 'rgba(255,255,255,.14)';
         b.style.background = on ? 'rgba(111,227,166,.12)' : 'rgba(255,255,255,.06)';
       });
+    const paintTags = () =>
+      tagButtons.forEach((b) => {
+        const on = selectedTags.has(b.getAttribute('data-tag'));
+        b.classList.toggle('is-on', on);
+      });
     paint();
+    paintTags();
     buttons.forEach((b) =>
       b.addEventListener('click', () => {
         softClick();
@@ -690,12 +833,29 @@
         paint();
       })
     );
+    tagButtons.forEach((b) =>
+      b.addEventListener('click', () => {
+        softClick();
+        const tag = b.getAttribute('data-tag');
+        if (selectedTags.has(tag)) selectedTags.delete(tag);
+        else selectedTags.add(tag);
+        paintTags();
+      })
+    );
     const confirmed = await confirmP;
     if (!confirmed) return;
     const energy = Number(modal?.querySelector('#mEnergy')?.value ?? 55);
     const note = (modal?.querySelector('#mNote')?.value ?? '').trim().slice(0, 500);
     const grat = (modal?.querySelector('#mGrat')?.value ?? '').trim().slice(0, 120);
-    const entry = { date: todayKey(), mood: picked, energy, note, gratitude: grat, t: Date.now() };
+    const entry = {
+      date: todayKey(),
+      mood: picked,
+      energy,
+      note,
+      gratitude: grat,
+      tags: [...selectedTags],
+      t: Date.now(),
+    };
     const idx = state.moods.findIndex((m) => m.date === entry.date);
     if (idx >= 0) state.moods[idx] = entry;
     else state.moods.push(entry);
@@ -714,15 +874,59 @@
         <div style="font-family:var(--font-title); font-size:22px; margin-top:6px">4 - 2 - 6</div>
         <div style="font-size:14px; color:var(--dim); margin-top:10px">Inspira 4 - Pausa 2 - Espira 6. Ripeti per 6 cicli.</div>
       </div>
+      <div class="timerBox" style="margin-top:12px">
+        <div class="timerValue" id="breathTimer">03:00</div>
+        <div class="timerPhase" id="breathPhase">Pronto</div>
+      </div>
       <div style="font-size:12px; color:var(--dim); margin-top:10px">Suggerimento: abbassa le spalle e lascia andare la mascella.</div>
+      <div style="margin-top:12px">
+        <div style="font-size:14px; color:var(--dim); margin-bottom:8px">Sessioni rapide</div>
+        <div class="chipRow">
+          <button class="chip" data-breath="60">1 min</button>
+          <button class="chip is-on" data-breath="180">3 min</button>
+          <button class="chip" data-breath="300">5 min</button>
+        </div>
+      </div>
+      <div class="inlineActions" style="margin-top:12px">
+        <button class="primary" id="breathStart" style="flex:1">Avvia</button>
+        <button class="ghost" id="breathStop" style="flex:1">Ferma</button>
+      </div>
     `;
-    await openModal({
+    const p = openModal({
       title: 'Respiro',
       body: 'Un minuto per te.',
       contentHTML: html,
       okText: 'Ok',
       cancelText: 'Chiudi',
     });
+    const breathButtons = [...(modal?.querySelectorAll('[data-breath]') || [])];
+    const paintBreathButtons = () =>
+      breathButtons.forEach((b) => {
+        const on = Number(b.getAttribute('data-breath')) === breathDuration;
+        b.classList.toggle('is-on', on);
+      });
+    paintBreathButtons();
+    breathButtons.forEach((b) =>
+      b.addEventListener('click', () => {
+        softClick();
+        breathDuration = Number(b.getAttribute('data-breath'));
+        stopBreathTimer();
+        updateBreathTimerUI();
+        paintBreathButtons();
+      })
+    );
+    modal?.querySelector('#breathStart')?.addEventListener('click', () => {
+      softClick();
+      startBreathTimer(breathDuration);
+    });
+    modal?.querySelector('#breathStop')?.addEventListener('click', () => {
+      softClick();
+      stopBreathTimer();
+      updateBreathTimerUI();
+    });
+    updateBreathTimerUI();
+    await p;
+    stopBreathTimer();
   }
 
   async function adviceDialog() {
@@ -826,6 +1030,63 @@
     });
   }
 
+  function moodsSince(days) {
+    const cutoff = Date.now() - days * 24 * 60 * 60 * 1000;
+    return state.moods.filter((m) => new Date(m.date).getTime() >= cutoff);
+  }
+
+  function topTags(limit = 5) {
+    const counts = {};
+    state.moods.forEach((m) => {
+      (m.tags || []).forEach((tag) => {
+        counts[tag] = (counts[tag] || 0) + 1;
+      });
+    });
+    return Object.entries(counts)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, limit)
+      .map(([tag, count]) => `${tag} (${count})`);
+  }
+
+  function exportMoodCsv() {
+    const headers = ['date', 'mood', 'energy', 'tags', 'gratitude', 'note'];
+    const rows = state.moods.map((m) => [
+      m.date,
+      m.mood,
+      m.energy ?? '',
+      (m.tags || []).join('|'),
+      (m.gratitude || '').replace(/\n/g, ' '),
+      (m.note || '').replace(/\n/g, ' '),
+    ]);
+    const csv = [headers.join(','), ...rows.map((r) => r.map((v) => `"${String(v).replace(/"/g, '""')}"`).join(','))].join('\n');
+    downloadBlob(new Blob([csv], { type: 'text/csv;charset=utf-8' }), `AURA_mood_${todayKey()}.csv`);
+    toast('Export CSV creato');
+  }
+
+  function exportInsightsPdf() {
+    const last7 = moodsSince(7);
+    const last30 = moodsSince(30);
+    const avgEnergy7 = last7.length ? Math.round(last7.reduce((s, m) => s + (m.energy ?? 55), 0) / last7.length) : 0;
+    const avgEnergy30 = last30.length ? Math.round(last30.reduce((s, m) => s + (m.energy ?? 55), 0) / last30.length) : 0;
+    const tags = topTags(6);
+    const lines = [
+      'AURA - Riepilogo locale',
+      `Data: ${fmtDateShort(new Date())}`,
+      '',
+      `Check-in totali: ${state.moods.length}`,
+      `Energia media 7 giorni: ${avgEnergy7}%`,
+      `Energia media 30 giorni: ${avgEnergy30}%`,
+      '',
+      'Tag piu frequenti:',
+      ...(tags.length ? tags : ['Nessun tag']),
+      '',
+      'Nota: dati solo locali, nessuna sincronizzazione.',
+    ];
+    const pdf = buildSimplePdf(lines);
+    downloadBlob(new Blob([pdf], { type: 'application/pdf' }), `AURA_insights_${todayKey()}.pdf`);
+    toast('Export PDF creato');
+  }
+
   async function statsDialog() {
     if (state.moods.length === 0) {
       await openModal({
@@ -846,11 +1107,26 @@
     const row = (label, val) => `<div style="display:flex; align-items:center; justify-content:space-between; gap:10px; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.1); border-radius:12px; padding:12px; margin-bottom:10px">
       <div><div style="font-weight:700">${label}</div><div style="font-size:12px; color:var(--dim)">${val} / ${last.length}</div></div>
       <div style="width:100px; height:8px; border-radius:999px; background:rgba(255,255,255,.08); overflow:hidden"><div style="height:100%; width:${Math.round((val / max) * 100)}%; background:linear-gradient(135deg,var(--g1),var(--g2))"></div></div></div>`;
+    const last7 = moodsSince(7);
+    const prev7 = moodsSince(14).filter((m) => new Date(m.date).getTime() < Date.now() - 7 * 24 * 60 * 60 * 1000);
+    const avgEnergy7 = last7.length ? Math.round(last7.reduce((s, m) => s + (m.energy ?? 55), 0) / last7.length) : 0;
+    const avgEnergyPrev7 = prev7.length ? Math.round(prev7.reduce((s, m) => s + (m.energy ?? 55), 0) / prev7.length) : 0;
+    const deltaEnergy = prev7.length ? avgEnergy7 - avgEnergyPrev7 : 0;
+    const tags = topTags(4).join(', ') || 'Nessuno';
     const html = `<div style="background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.1); border-radius:12px; padding:12px; margin-bottom:12px">
       <div style="font-weight:700; margin-bottom:6px">Energia media (ultimi ${last.length})</div>
       <div style="font-family:var(--font-title); font-size:34px">${avgEnergy}%</div>
     </div>
+    <div style="background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.1); border-radius:12px; padding:12px; margin-bottom:12px">
+      <div style="font-weight:700; margin-bottom:6px">Insight locali</div>
+      <div style="font-size:13px; color:var(--dim)">Energia 7 giorni: ${avgEnergy7}% (${deltaEnergy >= 0 ? '+' : ''}${deltaEnergy}% vs settimana precedente)</div>
+      <div style="font-size:13px; color:var(--dim); margin-top:6px">Tag piu frequenti: ${tags}</div>
+    </div>
     <div>${row('Calmo', counts.calm)}${row('Teso', counts.tense)}${row('Stanco', counts.tired)}${row('Giu', counts.down)}</div>
+    <div class="inlineActions" style="margin-top:12px">
+      <button class="ghost" id="statsCsv" style="flex:1">Export CSV</button>
+      <button class="ghost" id="statsPdf" style="flex:1">Export PDF</button>
+    </div>
     <div style="font-size:12px; color:var(--dim)">Dati solo locali. Nessun tracciamento.</div>`;
     await openModal({
       title: 'Statistiche',
@@ -858,6 +1134,14 @@
       contentHTML: html,
       okText: 'Ok',
       cancelText: 'Chiudi',
+    });
+    modal?.querySelector('#statsCsv')?.addEventListener('click', () => {
+      softClick();
+      exportMoodCsv();
+    });
+    modal?.querySelector('#statsPdf')?.addEventListener('click', () => {
+      softClick();
+      exportInsightsPdf();
     });
   }
 
@@ -887,6 +1171,31 @@
         <div style="font-weight:700; margin-bottom:10px">Privacy</div>
         <button class="ghost" id="sPin" style="width:100%; padding:12px">${state.pinEnabled ? 'PIN impostato' : 'Imposta PIN'}</button>
         <div style="font-size:12px; color:var(--dim); margin-top:10px">Il PIN cifra localmente umore, note e diario (AES-GCM).</div>
+      </div>
+      <div style="background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.1); border-radius:12px; padding:12px; margin-bottom:12px">
+        <div style="font-weight:700; margin-bottom:10px">Routine e promemoria</div>
+        <button class="ghost" id="sReminders" style="width:100%; padding:12px">${state.remindersEnabled ? 'Promemoria attivi' : 'Promemoria disattivi'}</button>
+        <div style="font-size:12px; color:var(--dim); margin-top:10px">I promemoria funzionano solo se l'app e' aperta.</div>
+        <div style="margin-top:12px; display:grid; gap:10px">
+          <div style="background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.1); border-radius:12px; padding:10px">
+            <div style="font-weight:700; margin-bottom:8px">Mattina</div>
+            <div style="display:grid; gap:8px">
+              <button class="ghost" id="rMorningToggle" style="padding:10px">${state.routines.morning.enabled ? 'Routine attiva' : 'Routine disattiva'}</button>
+              <input id="rMorningTime" type="time" value="${state.routines.morning.time}">
+              <input id="rMorningSteps" type="text" value="${state.routines.morning.steps.join(', ')}" placeholder="Passi separati da virgola">
+              <button class="ghost" id="rMorningDone" style="padding:10px">Segna completata oggi</button>
+            </div>
+          </div>
+          <div style="background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.1); border-radius:12px; padding:10px">
+            <div style="font-weight:700; margin-bottom:8px">Sera</div>
+            <div style="display:grid; gap:8px">
+              <button class="ghost" id="rEveningToggle" style="padding:10px">${state.routines.evening.enabled ? 'Routine attiva' : 'Routine disattiva'}</button>
+              <input id="rEveningTime" type="time" value="${state.routines.evening.time}">
+              <input id="rEveningSteps" type="text" value="${state.routines.evening.steps.join(', ')}" placeholder="Passi separati da virgola">
+              <button class="ghost" id="rEveningDone" style="padding:10px">Segna completata oggi</button>
+            </div>
+          </div>
+        </div>
       </div>
       <div style="background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.1); border-radius:12px; padding:12px">
         <div style="font-weight:700; margin-bottom:10px">Dati</div>
@@ -927,6 +1236,55 @@
       if (btn) btn.textContent = state.soundEnabled ? 'Audio attivo' : 'Audio disattivo';
       if (!state.soundEnabled && audio.on) audioStop();
       await saveState();
+    });
+    modal?.querySelector('#sReminders')?.addEventListener('click', async () => {
+      softClick();
+      state.remindersEnabled = !state.remindersEnabled;
+      const btn = modal.querySelector('#sReminders');
+      if (btn) btn.textContent = state.remindersEnabled ? 'Promemoria attivi' : 'Promemoria disattivi';
+      await saveState();
+    });
+    modal?.querySelector('#rMorningToggle')?.addEventListener('click', async () => {
+      softClick();
+      state.routines.morning.enabled = !state.routines.morning.enabled;
+      const btn = modal.querySelector('#rMorningToggle');
+      if (btn) btn.textContent = state.routines.morning.enabled ? 'Routine attiva' : 'Routine disattiva';
+      await saveState();
+    });
+    modal?.querySelector('#rEveningToggle')?.addEventListener('click', async () => {
+      softClick();
+      state.routines.evening.enabled = !state.routines.evening.enabled;
+      const btn = modal.querySelector('#rEveningToggle');
+      if (btn) btn.textContent = state.routines.evening.enabled ? 'Routine attiva' : 'Routine disattiva';
+      await saveState();
+    });
+    modal?.querySelector('#rMorningTime')?.addEventListener('change', async (e) => {
+      state.routines.morning.time = e.target.value;
+      await saveState();
+    });
+    modal?.querySelector('#rEveningTime')?.addEventListener('change', async (e) => {
+      state.routines.evening.time = e.target.value;
+      await saveState();
+    });
+    modal?.querySelector('#rMorningSteps')?.addEventListener('change', async (e) => {
+      state.routines.morning.steps = parseSteps(e.target.value);
+      await saveState();
+    });
+    modal?.querySelector('#rEveningSteps')?.addEventListener('change', async (e) => {
+      state.routines.evening.steps = parseSteps(e.target.value);
+      await saveState();
+    });
+    modal?.querySelector('#rMorningDone')?.addEventListener('click', async () => {
+      softClick();
+      state.routines.morning.lastDone = todayKey();
+      await saveState();
+      toast('Routine mattina completata');
+    });
+    modal?.querySelector('#rEveningDone')?.addEventListener('click', async () => {
+      softClick();
+      state.routines.evening.lastDone = todayKey();
+      await saveState();
+      toast('Routine sera completata');
     });
     modal?.querySelector('#sExport')?.addEventListener('click', () => {
       softClick();
@@ -1175,7 +1533,7 @@
       }
       sessionPin = pin;
       try {
-        state = await loadState();
+      state = normalizeState(await loadState());
         audio.env = state.audio?.env || 'forest';
         audio.vol = state.audio?.vol ?? 0.4;
         const lock = $('lock');
@@ -1184,6 +1542,7 @@
         successBeep();
         toast('Sbloccato');
         render();
+        setupRoutineReminders();
       } catch (e) {
         const hint = $('lockHint');
         if (hint) hint.textContent = 'Impossibile decrittare i dati.';
@@ -1345,6 +1704,36 @@
     touchStartX = e.touches[0].clientX;
   }, { passive: true });
 
+  let reminderTimer = null;
+
+  function checkRoutineReminder() {
+    if (!state.remindersEnabled) return;
+    const now = new Date();
+    const time = now.toTimeString().slice(0, 5);
+    const today = todayKey();
+    const routines = [
+      { key: 'morning', label: 'Routine mattina' },
+      { key: 'evening', label: 'Routine sera' },
+    ];
+    routines.forEach(({ key, label }) => {
+      const routine = state.routines[key];
+      if (!routine?.enabled) return;
+      if (routine.time !== time) return;
+      if (state.routines.lastReminder[key] === today) return;
+      if (routine.lastDone === today) return;
+      state.routines.lastReminder[key] = today;
+      saveState().catch(() => {});
+      toast(`${label}: e' il tuo momento`);
+      vibratePulse();
+    });
+  }
+
+  function setupRoutineReminders() {
+    if (reminderTimer) clearInterval(reminderTimer);
+    reminderTimer = setInterval(checkRoutineReminder, 60000);
+    checkRoutineReminder();
+  }
+
   document.addEventListener('touchend', (e) => {
     if (!e.changedTouches || e.changedTouches.length === 0) return;
     const touchEndY = e.changedTouches[0].clientY;
@@ -1407,13 +1796,14 @@
     }
 
     sessionPin = null;
-    state = await loadState().catch(() => defaultState());
+    state = normalizeState(await loadState().catch(() => defaultState()));
     audio.env = state.audio?.env || 'forest';
     audio.vol = state.audio?.vol ?? 0.4;
     audio.on = false;
     const mainUI = $('main-ui');
     if (mainUI) mainUI.classList.remove('hidden');
     render();
+    setupRoutineReminders();
   }
 
   boot().catch(() => {});
