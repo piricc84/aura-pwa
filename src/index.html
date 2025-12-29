@@ -11,20 +11,19 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="AURA" />
-    <meta name="description" content="AURA: guida il tuo respiro con un elfo nella foresta" />
+    <meta name="description" content="AURA: guida il respiro, l'umore e il diario con dati sempre locali." />
     <meta name="color-scheme" content="dark light" />
 
-    <title>AURA 3.6.0 • Elfo nella Foresta</title>
+    <title>AURA 3.6.0 - Elfo nella Foresta</title>
 
     <link rel="manifest" href="manifest.webmanifest" />
     <link rel="icon" href="icons/icon-192.png" />
     <link rel="apple-touch-icon" href="icons/icon-192.png" />
 
-    <!-- Preconnect to fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=DM+Sans:wght@400;500;600;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Fraunces:wght@400;600;700&family=Manrope:wght@400;500;600;700&display=swap"
       rel="stylesheet"
     />
 
@@ -42,111 +41,152 @@
       </div>
       <div class="particles" id="particles"></div>
 
-      <!-- Main UI -->
       <div id="main-ui" class="hidden">
-        <div class="top">
+        <header class="top">
           <div class="brand">
             <div class="logo">
-              <span>🧝</span>
+              <span>A</span>
             </div>
             <div class="titleWrap">
               <div class="appTitle">AURA</div>
-              <div class="appSub">Nella foresta</div>
+              <div class="appSub">Elfo nella foresta</div>
             </div>
           </div>
           <div class="topBtns">
-            <button id="btnStats" class="iconBtn" title="Statistiche">📊</button>
-            <button id="btnAudio" class="iconBtn" title="Audio">🔊</button>
-            <button id="btnSettings" class="iconBtn" title="Impostazioni">⚙️</button>
+            <button id="btnStats" class="iconBtn" title="Statistiche" aria-label="Statistiche">Statistiche</button>
+            <button id="btnAudio" class="iconBtn" title="Audio" aria-label="Audio">Audio</button>
+            <button id="btnSettings" class="iconBtn" title="Impostazioni" aria-label="Impostazioni">Impostazioni</button>
           </div>
-        </div>
+        </header>
 
         <main class="main">
           <section class="hero">
             <div class="heroTop">
-              <div class="time" id="heroTime">—</div>
+              <div class="time" id="heroTime">-</div>
               <div class="streak" id="streakBadge">
-                <span id="streakEmoji">🔥</span>
-                <span id="streakCount">—</span>
+                <span class="streakLabel">Serie</span>
+                <span id="streakCount">0</span>
               </div>
             </div>
 
-            <div class="scene">
-              <div class="elfWrap" id="elfWrap">
-                <div class="glow"></div>
-                <div class="elf">
-                  <div class="hat"></div>
-                  <div class="face">
-                    <div class="ear l"></div>
-                    <div class="ear r"></div>
-                    <div class="eyes">
-                      <div class="eye"></div>
-                      <div class="eye"></div>
+            <div class="heroBody">
+              <div class="welcome">
+                <div class="welcomeTitle">Ciao, <span id="userName">amico</span></div>
+                <div class="welcomeSub" id="welcomeSub">Respira piano, un passo alla volta.</div>
+              </div>
+              <div class="scene">
+                <div class="elfWrap" id="elfWrap">
+                  <div class="glow"></div>
+                  <div class="elf">
+                    <div class="hat"></div>
+                    <div class="face">
+                      <div class="ear l"></div>
+                      <div class="ear r"></div>
+                      <div class="eyes">
+                        <div class="eye"></div>
+                        <div class="eye"></div>
+                      </div>
+                      <div class="mouth"></div>
                     </div>
-                    <div class="mouth"></div>
                   </div>
                 </div>
+              </div>
+            </div>
+
+            <div class="statusRow">
+              <div class="statusCard">
+                <div class="statusLabel">Umore oggi</div>
+                <div class="statusValue" id="todayMoodLabel">Non registrato</div>
+              </div>
+              <div class="statusCard">
+                <div class="statusLabel">Energia</div>
+                <div class="statusValue" id="todayEnergy">-</div>
+              </div>
+              <div class="statusCard">
+                <div class="statusLabel">Diario</div>
+                <div class="statusValue" id="todayJournal">Vuoto</div>
               </div>
             </div>
 
             <div class="hint" id="hint">Tocca l'elfo per un consiglio</div>
           </section>
 
-          <div class="buttonRow">
-            <button id="bMood" class="btn">😊 Umore</button>
-            <button id="bBreath" class="btn">💨 Respira</button>
-            <button id="bAdvice" class="btn">💡 Consigli</button>
+          <div class="actionGrid">
+            <button id="bMood" class="actionBtn">
+              <span class="btnLabel">Umore</span>
+              <span class="btnSub">Check-in rapido</span>
+            </button>
+            <button id="bBreath" class="actionBtn">
+              <span class="btnLabel">Respiro</span>
+              <span class="btnSub">Ciclo 4-2-6</span>
+            </button>
+            <button id="bAdvice" class="actionBtn">
+              <span class="btnLabel">Consiglio</span>
+              <span class="btnSub">Una cosa semplice</span>
+            </button>
+            <button id="bJournal" class="actionBtn">
+              <span class="btnLabel">Diario</span>
+              <span class="btnSub">Scrittura libera</span>
+            </button>
           </div>
 
-          <div class="buttonRow">
-            <button id="bJournal" class="btn">📔 Diario</button>
-            <button id="bJourney" class="btn">🗺️ Viaggio</button>
-            <button id="bHelp" class="btn">❓ Guida</button>
-          </div>
-
-          <div style="display: flex; gap: 10px; padding: 0 14px">
-            <button id="btnLock" class="btn" style="flex: 1">🔒</button>
+          <div class="actionGrid">
+            <button id="bJourney" class="actionBtn">
+              <span class="btnLabel">Percorso</span>
+              <span class="btnSub">I tuoi passi</span>
+            </button>
+            <button id="bHelp" class="actionBtn">
+              <span class="btnLabel">Guida</span>
+              <span class="btnSub">Mini demo</span>
+            </button>
+            <button id="btnLock" class="actionBtn actionBtn--wide">
+              <span class="btnLabel">Blocco</span>
+              <span class="btnSub" id="lockStatus">Disattivato</span>
+            </button>
           </div>
         </main>
 
         <section id="audioPanel" class="audioPanel" aria-label="Pannello audio">
-          <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 12px">
+          <div class="panelTop">
             <div>
-              <div style="font-weight: 700; margin-bottom: 4px">Ambiente sonoro</div>
-              <div style="font-size: 12px; color: var(--dim2)" id="audioStatus">Pronto</div>
+              <div class="panelTitle">Ambiente sonoro</div>
+              <div class="panelSub" id="audioStatus">Pronto</div>
             </div>
-            <div style="display: flex; gap: 6px">
-              <button id="audioToggle" style="padding: 8px 12px">▶</button>
-              <button id="audioClose" style="padding: 8px 12px">✕</button>
+            <div class="panelActions">
+              <button id="audioToggle" class="panelBtn">Avvia</button>
+              <button id="audioClose" class="panelBtn">Chiudi</button>
             </div>
           </div>
-          <div style="display: flex; flex-direction: column; gap: 12px">
+          <div class="panelBody">
             <select id="audioEnv" aria-label="Seleziona ambiente">
-              <option value="forest">🌲 Foresta</option>
-              <option value="rain">🌧️ Pioggia lieve</option>
-              <option value="river">💧 Ruscello</option>
-              <option value="night">🌙 Notte stellata</option>
+              <option value="forest">Foresta</option>
+              <option value="rain">Pioggia lieve</option>
+              <option value="river">Ruscello</option>
+              <option value="night">Notte stellata</option>
+              <option value="ocean">Oceano lento</option>
+              <option value="thunderstorm">Temporale distante</option>
+              <option value="mountain">Alta quota</option>
+              <option value="insects">Notte estiva</option>
             </select>
-            <div style="display: flex; align-items: center; gap: 12px">
-              <label style="font-size: 12px; color: var(--dim2)">Volume:</label>
-              <input id="audioVol" type="range" min="5" max="100" value="40" style="flex: 1; margin: 0" />
-              <span id="volLbl" style="font-size: 12px; font-weight: 700; min-width: 40px">40%</span>
+            <div class="panelRow">
+              <label class="panelLabel">Volume</label>
+              <input id="audioVol" type="range" min="5" max="100" value="40" />
+              <span id="volLbl" class="panelValue">40%</span>
             </div>
           </div>
         </section>
       </div>
 
-      <!-- AUTH SCREEN -->
       <div id="auth" class="full" style="display: none">
         <div class="center">
-          <div style="font-size: 48px; margin-bottom: 16px">🧝‍♂️🌲</div>
+          <div class="symbol">A</div>
           <div class="bigTitle serif">AURA</div>
           <div class="bigSub">
-            Accesso locale (senza server). Registrati sul dispositivo o usa la modalità ospite.
+            Accesso locale (senza server). Registrati sul dispositivo o usa la modalita&apos; ospite.
           </div>
-          <div style="width: 100%; max-width: 360px; margin-top: 16px" class="card">
+          <div class="card" style="width: 100%; max-width: 360px; margin-top: 16px">
             <div class="k">Account locale</div>
-            <div style="margin-top: 10px; display: flex; gap: 10px">
+            <div class="tabRow">
               <button id="authTabLogin" class="ghost" style="flex: 1">Accedi</button>
               <button id="authTabReg" class="ghost" style="flex: 1">Registrati</button>
             </div>
@@ -168,10 +208,9 @@
         </div>
       </div>
 
-      <!-- INTRO SCREEN -->
       <div id="intro" class="full" style="display: none">
         <div class="center">
-          <div style="font-size: 48px; margin-bottom: 16px">🧝‍♂️🌲</div>
+          <div class="symbol">A</div>
           <div class="bigTitle serif">Benvenuto in AURA</div>
           <div class="bigSub">
             Un elfo guida il tuo respiro nella foresta. Registra il tuo umore, ricevi consigli e proteggi i tuoi pensieri:
@@ -191,10 +230,9 @@
         </div>
       </div>
 
-      <!-- LOCK SCREEN -->
       <div id="lock" class="full" style="display: none">
         <div class="center">
-          <div style="font-size: 48px; margin-bottom: 16px">🔐</div>
+          <div class="symbol">A</div>
           <div class="bigTitle serif">Sblocco</div>
           <div class="bigSub">Inserisci il PIN per accedere ai contenuti protetti.</div>
           <div style="width: 100%; max-width: 300px; margin-top: 16px">
@@ -207,14 +245,13 @@
         </div>
       </div>
 
-      <!-- MODAL -->
       <div id="modal" class="overlay" role="dialog" aria-modal="true" style="display: none">
         <div class="sheet">
-          <div style="height: 4px; width: 36px; background: rgba(255,255,255,0.2); border-radius: 2px; margin: 0 auto 16px"></div>
-          <h2 id="mTitle" style="margin: 0 0 12px 0; font-size: 18px">—</h2>
-          <div id="mBody" class="hint">—</div>
+          <div class="sheetHandle"></div>
+          <h2 id="mTitle" style="margin: 0 0 12px 0; font-size: 18px">-</h2>
+          <div id="mBody" class="hint">-</div>
           <div id="mContent"></div>
-          <div style="display: flex; gap: 10px; margin-top: 14px">
+          <div class="sheetActions">
             <button id="mOk" class="primary" style="flex: 1">Ok</button>
             <button id="mCancel" class="ghost" style="flex: 1">Chiudi</button>
           </div>

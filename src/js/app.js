@@ -198,27 +198,33 @@
       '--bg1': '#0b1220',
       '--bg2': '#0e2a18',
       '--bg3': '#12331d',
-      '--g1': 'rgba(111,227,166,.95)',
-      '--g2': 'rgba(92,199,255,.80)',
-      '--gold': 'rgba(240,208,138,.92)',
+      '--g1': 'rgba(123,227,179,.95)',
+      '--g2': 'rgba(91,188,255,.85)',
+      '--gold': 'rgba(243,213,154,.92)',
+      '--accent': '#7be3b3',
+      '--accent2': '#5bbcff',
     },
     night: {
-      '--bg0': '#040712',
-      '--bg1': '#070b18',
-      '--bg2': '#081126',
-      '--bg3': '#0c1630',
-      '--g1': 'rgba(140,199,255,.92)',
-      '--g2': 'rgba(164,139,255,.80)',
-      '--gold': 'rgba(255,216,137,.92)',
+      '--bg0': '#050814',
+      '--bg1': '#0a0f1f',
+      '--bg2': '#0d172e',
+      '--bg3': '#132043',
+      '--g1': 'rgba(138,208,255,.92)',
+      '--g2': 'rgba(91,188,255,.85)',
+      '--gold': 'rgba(255,214,139,.92)',
+      '--accent': '#8ad0ff',
+      '--accent2': '#5bbcff',
     },
     dawn: {
-      '--bg0': '#0a0810',
-      '--bg1': '#130a18',
-      '--bg2': '#1a0f22',
-      '--bg3': '#22152c',
+      '--bg0': '#120a10',
+      '--bg1': '#1c0f18',
+      '--bg2': '#2a1522',
+      '--bg3': '#3a1e2c',
       '--g1': 'rgba(255,182,166,.92)',
-      '--g2': 'rgba(255,208,122,.80)',
+      '--g2': 'rgba(255,195,108,.85)',
       '--gold': 'rgba(255,224,163,.92)',
+      '--accent': '#ffb6a6',
+      '--accent2': '#ffc36c',
     },
     ocean: {
       '--bg0': '#0a1f2e',
@@ -226,26 +232,32 @@
       '--bg2': '#0f3a52',
       '--bg3': '#134361',
       '--g1': 'rgba(52,211,153,.95)',
-      '--g2': 'rgba(65,176,222,.80)',
+      '--g2': 'rgba(65,176,222,.85)',
       '--gold': 'rgba(96,165,250,.92)',
+      '--accent': '#34d399',
+      '--accent2': '#41b0de',
     },
     mountain: {
       '--bg0': '#1f1b2e',
-      '--bg1': '#2d1d3d',
-      '--bg2': '#3d2557',
-      '--bg3': '#4a3166',
+      '--bg1': '#2a1f3a',
+      '--bg2': '#332544',
+      '--bg3': '#3e2f4d',
       '--g1': 'rgba(244,167,91,.95)',
-      '--g2': 'rgba(192,132,250,.80)',
+      '--g2': 'rgba(241,194,122,.85)',
       '--gold': 'rgba(251,191,36,.92)',
+      '--accent': '#f4a75b',
+      '--accent2': '#f1c27a',
     },
     aurora: {
-      '--bg0': '#0f172a',
-      '--bg1': '#1a1a4d',
-      '--bg2': '#2d1b4e',
-      '--bg3': '#3d2563',
-      '--g1': 'rgba(168,85,247,.95)',
-      '--g2': 'rgba(236,72,153,.80)',
-      '--gold': 'rgba(240,171,252,.92)',
+      '--bg0': '#0b1418',
+      '--bg1': '#0f1e22',
+      '--bg2': '#12282f',
+      '--bg3': '#15333b',
+      '--g1': 'rgba(34,211,238,.95)',
+      '--g2': 'rgba(94,234,212,.85)',
+      '--gold': 'rgba(240,255,209,.9)',
+      '--accent': '#22d3ee',
+      '--accent2': '#5eead4',
     },
   };
 
@@ -266,7 +278,7 @@
     if (!AC) return null;
     audio.ctx = new AC();
     audio.master = audio.ctx.createGain();
-    audio.master.gain.value = 0.12; // Volume default più alto (era 0.0001)
+    audio.master.gain.value = 0.12; // Volume default piu alto (era 0.0001)
     audio.master.connect(audio.ctx.destination);
     return audio.ctx;
   }
@@ -431,11 +443,11 @@
     if (env) env.value = audio.env;
     if (vol) vol.value = Math.round(audio.vol * 100);
     if (volLbl) volLbl.textContent = Math.round(audio.vol * 100) + '%';
-    if (toggle) toggle.innerHTML = audio.on ? '⏸ <span>Pausa</span>' : '▶ <span>Play</span>';
+    if (toggle) toggle.textContent = audio.on ? 'Pausa' : 'Avvia';
     if (status)
       status.textContent = audio.on
-        ? `In riproduzione • volume ${Math.round(audio.vol * 100)}%`
-        : 'Pronto. Tocca ▶ per avviare.';
+        ? `In riproduzione, volume ${Math.round(audio.vol * 100)}%`
+        : 'Pronto. Tocca Avvia per iniziare.';
   }
 
   async function audioStart() {
@@ -493,21 +505,26 @@
   // ===== ADVICE & QUOTES =====
   const advice = {
     calm: [
-      'Fai 3 respiri lenti: espira più a lungo.',
+      'Fai 3 respiri lenti: espira pi\u00f9 a lungo.',
       'Metti una mano sul petto: "Sono qui."',
       'Scegli una cosa semplice da fare con calma.',
     ],
-    tense: ['Sciogli mascella e spalle. Ripeti 3 volte.', 'Micro‑obiettivo: 10 minuti su UNA cosa.', 'Respiro 4‑2‑6 per 6 cicli.'],
-    tired: ['Luce naturale 60s, poi acqua.', 'Occhi chiusi 30s: espira lungo.', 'Silenzia notifiche 10 minuti.'],
-    down: ['3 cose che vedi • 2 suoni • 1 sensazione.', 'Gratitudine minuscola. Vale.', 'Gesto gentile: doccia breve o tisana.'],
+    tense: [
+      'Sciogli mascella e spalle. Ripeti 3 volte.',
+      'Micro-obiettivo: 10 minuti su una cosa.',
+      'Respiro 4-2-6 per 6 cicli.',
+    ],
+    tired: ['Luce naturale per 60s, poi acqua.', 'Occhi chiusi 30s: espira lungo.', 'Silenzia notifiche per 10 minuti.'],
+    down: ['3 cose che vedi, 2 suoni, 1 sensazione.', 'Gratitudine minuscola. Vale.', 'Gesto gentile: doccia breve o tisana.'],
   };
   const quotes = [
-    '"Niente è troppo piccolo per meritare cura."',
-    '"Un passo gentile è sempre un passo."',
-    '"La calma è forza che non urla."',
-    '"Il respiro è un ponte: torna qui."',
+    '"Niente e\' troppo piccolo per meritare cura."',
+    '"Un passo gentile e\' sempre un passo."',
+    '"La calma e\' forza che non urla."',
+    '"Il respiro e\' un ponte: torna qui."',
     '"Oggi scegli morbidezza."',
   ];
+  const moodLabels = { calm: 'Calmo', tense: 'Teso', tired: 'Stanco', down: 'Giu' };
 
   // ===== RENDER =====
   function setTime() {
@@ -553,10 +570,32 @@
       const a = advice[mood] || advice.calm;
       hintEl.textContent = a[Math.floor(Math.random() * a.length)];
     }
-    const lockBtn = $('btnLock');
-    if (lockBtn) {
-      lockBtn.innerHTML = '<span>🔒</span>' + (state.lockEnabled ? '<span class="dot"></span>' : '');
+    const nameEl = $('userName');
+    if (nameEl) nameEl.textContent = state.name ? state.name : 'amico';
+
+    const today = todayMood();
+    const moodLabel = today ? moodLabels[today.mood] || 'Non registrato' : 'Non registrato';
+    const moodEl = $('todayMoodLabel');
+    if (moodEl) moodEl.textContent = moodLabel;
+    const energyEl = $('todayEnergy');
+    if (energyEl) energyEl.textContent = today ? `${clamp(today.energy ?? 55, 0, 100)}%` : '-';
+    const journalEl = $('todayJournal');
+    if (journalEl) journalEl.textContent = state.journal.find((j) => j.date === todayKey()) ? 'Compilato' : 'Vuoto';
+
+    const welcomeSub = $('welcomeSub');
+    if (welcomeSub) {
+      const hasMood = !!today;
+      const hasJournal = !!state.journal.find((j) => j.date === todayKey());
+      let text = 'Un check-in rapido ti aspetta.';
+      if (hasMood && hasJournal) text = 'Umore e diario di oggi sono gia\' registrati.';
+      else if (hasMood) text = 'Umore registrato. Vuoi aggiungere una nota?';
+      else if (hasJournal) text = 'Diario pronto. Vuoi registrare anche l\'umore?';
+      welcomeSub.textContent = text;
     }
+    const lockBtn = $('btnLock');
+    if (lockBtn) lockBtn.classList.toggle('is-active', state.lockEnabled);
+    const lockStatus = $('lockStatus');
+    if (lockStatus) lockStatus.textContent = state.lockEnabled ? 'Attivo al prossimo avvio' : 'Disattivato';
     setAudioUI();
   }
 
@@ -575,12 +614,18 @@
     const mCancel = $('mCancel');
     if (mOk) mOk.textContent = okText;
     if (mCancel) mCancel.textContent = cancelText;
-    if (modal) modal.style.display = 'flex';
+    if (modal) {
+      modal.style.display = 'flex';
+      modal.classList.add('show');
+    }
     return new Promise((res) => (modalResolve = res));
   }
 
   function closeModal(val = false) {
-    if (modal) modal.style.display = 'none';
+    if (modal) {
+      modal.classList.remove('show');
+      modal.style.display = 'none';
+    }
     if (modalResolve) {
       modalResolve(val);
       modalResolve = null;
@@ -594,16 +639,17 @@
   async function moodDialog() {
     const tm = todayMood();
     const current = tm ? tm.mood : null;
+    const currentLabel = current ? moodLabels[current] || current : null;
     let picked = current || 'calm';
     const html = `
       <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:12px">
-        <button class="ghost" data-mood="calm" style="padding:12px">🌿 Calmo</button>
-        <button class="ghost" data-mood="tense" style="padding:12px">🔥 Teso</button>
-        <button class="ghost" data-mood="tired" style="padding:12px">🌙 Stanco</button>
-        <button class="ghost" data-mood="down" style="padding:12px">💛 Giù</button>
+        <button class="ghost" data-mood="calm" style="padding:12px">Calmo</button>
+        <button class="ghost" data-mood="tense" style="padding:12px">Teso</button>
+        <button class="ghost" data-mood="tired" style="padding:12px">Stanco</button>
+        <button class="ghost" data-mood="down" style="padding:12px">Giu</button>
       </div>
       <div style="margin-bottom:12px; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.1); border-radius:12px; padding:12px">
-        <div style="font-weight:700; margin-bottom:8px">Energia (0‑100)</div>
+        <div style="font-weight:700; margin-bottom:8px">Energia (0-100)</div>
         <input id="mEnergy" type="range" min="0" max="100" value="${tm ? clamp(tm.energy ?? 55, 0, 100) : 55}" style="width:100%">
         <div style="display:flex; justify-content:space-between; margin-top:6px; color:var(--dim2); font-weight:900; font-size:12px">
           <span>Scarico</span><span>Carico</span>
@@ -624,7 +670,7 @@
     `;
     const confirmP = openModal({
       title: 'Come ti senti oggi?',
-      body: current ? `Oggi risulta già registrato: <b>${current}</b>. Puoi aggiornare.` : 'Scegli una parola semplice.',
+      body: current ? `Oggi risulta gia' registrato: <b>${currentLabel}</b>. Puoi aggiornare.` : 'Scegli una parola semplice.',
       contentHTML: html,
       okText: 'Salva',
       cancelText: 'Annulla',
@@ -657,7 +703,7 @@
     await saveState();
     vibrateSuccess();
     successBeep();
-    toast('Salvato ✅');
+    toast('Salvato');
     render();
   }
 
@@ -665,8 +711,8 @@
     const html = `
       <div style="background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.1); border-radius:12px; padding:12px">
         <div style="font-weight:700; margin-bottom:6px">Respiro guidato</div>
-        <div style="font-family:'Cormorant Garamond',serif; font-size:22px; margin-top:6px">4 • 2 • 6</div>
-        <div style="font-size:14px; color:var(--dim); margin-top:10px">Inspira 4 • Pausa 2 • Espira 6. Ripeti per 6 cicli.</div>
+        <div style="font-family:var(--font-title); font-size:22px; margin-top:6px">4 - 2 - 6</div>
+        <div style="font-size:14px; color:var(--dim); margin-top:10px">Inspira 4 - Pausa 2 - Espira 6. Ripeti per 6 cicli.</div>
       </div>
       <div style="font-size:12px; color:var(--dim); margin-top:10px">Suggerimento: abbassa le spalle e lascia andare la mascella.</div>
     `;
@@ -686,7 +732,7 @@
     const tip = a[Math.floor(Math.random() * a.length)];
     const html = `<div style="background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.1); border-radius:12px; padding:12px">
       <div style="font-weight:700; margin-bottom:6px">Consiglio dell'elfo</div>
-      <div style="font-family:'Cormorant Garamond',serif; font-size:20px; margin-top:6px">${tip}</div>
+      <div style="font-family:var(--font-title); font-size:20px; margin-top:6px">${tip}</div>
     </div><div style="font-size:12px; color:var(--dim); margin-top:10px">Piccolo, gentile, fattibile.</div>`;
     await openModal({
       title: 'Consiglio',
@@ -708,8 +754,8 @@
         existing ? (existing.text ? existing.text.replace(/</g, '&lt;') : '') : ''
       }</textarea>
       <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:12px">
-        <button class="ghost" id="jExport" style="padding:12px">⬇ Export</button>
-        <button class="ghost" id="jClear" style="padding:12px">🗑 Pulisci</button>
+        <button class="ghost" id="jExport" style="padding:12px">Export</button>
+        <button class="ghost" id="jClear" style="padding:12px">Pulisci</button>
       </div>
       <div style="font-size:12px; color:var(--dim)">Export crea un file .txt sul dispositivo.</div>
     `;
@@ -736,7 +782,7 @@
       a.click();
       a.remove();
       setTimeout(() => URL.revokeObjectURL(a.href), 800);
-      toast('Export creato ✅');
+      toast('Export creato');
     });
     modal?.querySelector('#jClear')?.addEventListener('click', () => {
       softClick();
@@ -757,23 +803,23 @@
     await saveState();
     vibrateSuccess();
     successBeep();
-    toast('Salvato ✅');
+    toast('Salvato');
   }
 
   async function journeyDialog() {
     const steps = new Set(state.moods.map((m) => m.date)).size;
     const html = `<div style="background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.1); border-radius:12px; padding:12px; margin-bottom:12px">
       <div style="font-weight:700; margin-bottom:6px">Passi nella foresta</div>
-      <div style="font-family:'Cormorant Garamond',serif; font-size:34px">${steps}</div>
+      <div style="font-family:var(--font-title); font-size:34px">${steps}</div>
       <div style="font-size:12px; color:var(--dim)">Un passo = un giorno con umore registrato.</div>
     </div>
     <div style="background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.1); border-radius:12px; padding:12px">
       <div style="font-weight:700; margin-bottom:6px">Rituale rapido</div>
-      <div style="font-size:14px; color:var(--dim)">1) Umore • 2) 30s Respiro • 3) Micro‑obiettivo gentile.</div>
+      <div style="font-size:14px; color:var(--dim)">1) Umore - 2) 30s Respiro - 3) Micro-obiettivo gentile.</div>
     </div>`;
     await openModal({
       title: 'Percorso',
-      body: 'Ogni giorno è un passo nella foresta.',
+      body: 'Ogni giorno e\' un passo nella foresta.',
       contentHTML: html,
       okText: 'Ok',
       cancelText: 'Chiudi',
@@ -786,7 +832,7 @@
         title: 'Statistiche',
         body: 'Ancora nessun dato.',
         contentHTML:
-          '<div style="background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.1); border-radius:12px; padding:12px"><div style="font-weight:700; margin-bottom:6px">Suggerimento</div><div style="font-family:\'Cormorant Garamond\',serif; font-size:18px">Registra l\'umore oggi. Bastano 10 secondi.</div></div>',
+          '<div style="background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.1); border-radius:12px; padding:12px"><div style="font-weight:700; margin-bottom:6px">Suggerimento</div><div style="font-family:var(--font-title); font-size:18px">Registra l\'umore oggi. Bastano 10 secondi.</div></div>',
         okText: 'Ok',
         cancelText: 'Chiudi',
       });
@@ -797,14 +843,14 @@
     last.forEach((x) => (counts[x.mood] = (counts[x.mood] || 0) + 1));
     const avgEnergy = Math.round(last.reduce((s, x) => s + (x.energy ?? 55), 0) / last.length);
     const max = Math.max(1, ...Object.values(counts));
-    const row = (label, val, emo) => `<div style="display:flex; align-items:center; justify-content:space-between; gap:10px; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.1); border-radius:12px; padding:12px; margin-bottom:10px">
-      <div style="display:flex; align-items:center; gap:10px"><div style="font-size:22px">${emo}</div><div><div style="font-weight:700">${label}</div><div style="font-size:12px; color:var(--dim)">${val} / ${last.length}</div></div></div>
+    const row = (label, val) => `<div style="display:flex; align-items:center; justify-content:space-between; gap:10px; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.1); border-radius:12px; padding:12px; margin-bottom:10px">
+      <div><div style="font-weight:700">${label}</div><div style="font-size:12px; color:var(--dim)">${val} / ${last.length}</div></div>
       <div style="width:100px; height:8px; border-radius:999px; background:rgba(255,255,255,.08); overflow:hidden"><div style="height:100%; width:${Math.round((val / max) * 100)}%; background:linear-gradient(135deg,var(--g1),var(--g2))"></div></div></div>`;
     const html = `<div style="background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.1); border-radius:12px; padding:12px; margin-bottom:12px">
       <div style="font-weight:700; margin-bottom:6px">Energia media (ultimi ${last.length})</div>
-      <div style="font-family:'Cormorant Garamond',serif; font-size:34px">${avgEnergy}%</div>
+      <div style="font-family:var(--font-title); font-size:34px">${avgEnergy}%</div>
     </div>
-    <div>${row('Calmo', counts.calm, '🌿')}${row('Teso', counts.tense, '🔥')}${row('Stanco', counts.tired, '🌙')}${row('Giù', counts.down, '💛')}</div>
+    <div>${row('Calmo', counts.calm)}${row('Teso', counts.tense)}${row('Stanco', counts.tired)}${row('Giu', counts.down)}</div>
     <div style="font-size:12px; color:var(--dim)">Dati solo locali. Nessun tracciamento.</div>`;
     await openModal({
       title: 'Statistiche',
@@ -820,32 +866,33 @@
       <div style="background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.1); border-radius:12px; padding:12px; margin-bottom:12px">
         <div style="font-weight:700; margin-bottom:10px">Tema</div>
         <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px">
-          <button class="ghost" data-theme="forest" style="padding:12px">🌲 Foresta</button>
-          <button class="ghost" data-theme="night" style="padding:12px">🌙 Notte</button>
-          <button class="ghost" data-theme="dawn" style="padding:12px">🌅 Alba</button>
-          <button class="ghost" data-theme="ocean" style="padding:12px">🌊 Oceano</button>
-          <button class="ghost" data-theme="mountain" style="padding:12px">⛰️ Montagna</button>
-          <button class="ghost" data-theme="aurora" style="padding:12px">🌌 Aurora</button>
+          <button class="ghost" data-theme="forest" style="padding:12px">Foresta</button>
+          <button class="ghost" data-theme="night" style="padding:12px">Notte</button>
+          <button class="ghost" data-theme="dawn" style="padding:12px">Alba</button>
+          <button class="ghost" data-theme="ocean" style="padding:12px">Oceano</button>
+          <button class="ghost" data-theme="mountain" style="padding:12px">Montagna</button>
+          <button class="ghost" data-theme="aurora" style="padding:12px">Aurora</button>
         </div>
       </div>
       <div style="background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.1); border-radius:12px; padding:12px; margin-bottom:12px">
         <div style="font-weight:700; margin-bottom:10px">Azioni</div>
-        <div style="display:flex; gap:10px">
-          <button class="ghost" id="sLogout" style="flex:1; padding:12px">🚪 Logout</button>
-          <button class="ghost" id="sSound" style="flex:1; padding:12px">${state.soundEnabled ? '🔔 Audio ON' : '🔕 Audio OFF'}</button>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px">
+          <button class="ghost" id="sLogout" style="padding:12px">Logout</button>
+          <button class="ghost" id="sSound" style="padding:12px">${state.soundEnabled ? 'Audio attivo' : 'Audio disattivo'}</button>
+          <button class="ghost" id="sHaptics" style="padding:12px">${state.haptics ? 'Haptics attivi' : 'Haptics disattivi'}</button>
         </div>
-        <div style="font-size:12px; color:var(--dim); margin-top:10px">Su iPhone la vibrazione può essere limitata da iOS.</div>
+        <div style="font-size:12px; color:var(--dim); margin-top:10px">Su iPhone la vibrazione puo' essere limitata da iOS.</div>
       </div>
       <div style="background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.1); border-radius:12px; padding:12px; margin-bottom:12px">
         <div style="font-weight:700; margin-bottom:10px">Privacy</div>
-        <button class="ghost" id="sPin" style="width:100%; padding:12px">${state.pinEnabled ? '🔐 PIN impostato' : '🔐 Imposta PIN'}</button>
-        <div style="font-size:12px; color:var(--dim); margin-top:10px">Il PIN cifra localmente umore, note e diario (AES‑GCM).</div>
+        <button class="ghost" id="sPin" style="width:100%; padding:12px">${state.pinEnabled ? 'PIN impostato' : 'Imposta PIN'}</button>
+        <div style="font-size:12px; color:var(--dim); margin-top:10px">Il PIN cifra localmente umore, note e diario (AES-GCM).</div>
       </div>
       <div style="background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.1); border-radius:12px; padding:12px">
         <div style="font-weight:700; margin-bottom:10px">Dati</div>
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px">
-          <button class="ghost" id="sExport" style="padding:12px">⬇ Export</button>
-          <button class="ghost" id="sReset" style="padding:12px">🧨 Reset</button>
+          <button class="ghost" id="sExport" style="padding:12px">Export</button>
+          <button class="ghost" id="sReset" style="padding:12px">Reset</button>
         </div>
         <div style="font-size:12px; color:var(--dim); margin-top:10px">Reset cancella i dati dell'utente corrente.</div>
       </div>
@@ -870,14 +917,14 @@
       softClick();
       state.haptics = !state.haptics;
       const btn = modal.querySelector('#sHaptics');
-      if (btn) btn.textContent = state.haptics ? '📳 Haptics ON' : '📳 Haptics OFF';
+      if (btn) btn.textContent = state.haptics ? 'Haptics attivi' : 'Haptics disattivi';
       await saveState();
     });
     modal?.querySelector('#sSound')?.addEventListener('click', async () => {
       softClick();
       state.soundEnabled = !state.soundEnabled;
       const btn = modal.querySelector('#sSound');
-      if (btn) btn.textContent = state.soundEnabled ? '🔔 Audio ON' : '🔕 Audio OFF';
+      if (btn) btn.textContent = state.soundEnabled ? 'Audio attivo' : 'Audio disattivo';
       if (!state.soundEnabled && audio.on) audioStop();
       await saveState();
     });
@@ -891,7 +938,7 @@
       a.click();
       a.remove();
       setTimeout(() => URL.revokeObjectURL(a.href), 800);
-      toast('Export creato ✅');
+      toast('Export creato');
     });
     modal?.querySelector('#sReset')?.addEventListener('click', async () => {
       softClick();
@@ -951,7 +998,7 @@
       vibrateSuccess();
       successBeep();
       doubleBeep();
-      toast('PIN impostato ✅');
+      toast('PIN impostato');
       render();
     });
     await p;
@@ -961,7 +1008,7 @@
     const steps = [
       { id: 'bMood', text: '1/3 Tocca "Umore" e scegli come stai.' },
       { id: 'bBreath', text: '2/3 Prova "Respiro".' },
-      { id: 'btnAudio', text: '3/3 Attiva "Audio" per rendere tutto più rilassante.' },
+      { id: 'btnAudio', text: '3/3 Attiva "Audio" per rendere tutto piu rilassante.' },
     ];
     const hint = $('hint');
     for (const s of steps) {
@@ -1036,7 +1083,7 @@
           return;
         }
         if (existing) {
-          if (hint) hint.textContent = 'Utente già presente su questo dispositivo.';
+          if (hint) hint.textContent = 'Utente gia\' presente su questo dispositivo.';
           safeVibrate([12, 40, 12]);
           return;
         }
@@ -1044,7 +1091,7 @@
         users.push({ user, hash, saltB64, createdAt: nowISO() });
         setUsers(users);
         setCurrentUser(user);
-        toast('Registrato ✅');
+        toast('Registrato');
         setTimeout(() => location.reload(), 350);
       } else {
         if (!existing) {
@@ -1059,7 +1106,7 @@
           return;
         }
         setCurrentUser(user);
-        toast('Accesso OK ✅');
+        toast('Accesso OK');
         setTimeout(() => location.reload(), 300);
       }
     });
@@ -1135,7 +1182,7 @@
         if (lock) lock.style.display = 'none';
         vibrateSuccess();
         successBeep();
-        toast('Sbloccato ✅');
+        toast('Sbloccato');
         render();
       } catch (e) {
         const hint = $('lockHint');
@@ -1160,7 +1207,7 @@
     }
 
     const particles = $('particles');
-    const particleGlyphs = ['🍃', '✨', '🌿', '❄️'];
+    const particleGlyphs = ['*', '+', '.', '~'];
     function spawnParticle() {
       if (!particles) return;
       const p = document.createElement('div');
