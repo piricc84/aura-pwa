@@ -175,6 +175,20 @@
       localStorage.setItem(STATE_KEY(), JSON.stringify(state));
     }
   }
+
+  let saveTimer = null;
+  function saveStateThrottled(delay = 160) {
+    return new Promise((resolve) => {
+      if (saveTimer) clearTimeout(saveTimer);
+      saveTimer = setTimeout(async () => {
+        saveTimer = null;
+        try {
+          await saveState();
+        } catch (e) {}
+        resolve();
+      }, delay);
+    });
+  }
   async function loadState() {
     const raw = localStorage.getItem(STATE_KEY());
     if (!raw) return defaultState();
@@ -249,12 +263,19 @@
     },
   };
 
+  let currentTheme = '';
   function applyTheme() {
     const t = themes[state.theme] ? state.theme : 'forest';
     state.theme = t;
-    const root = document.documentElement;
-    Object.entries(themes[t]).forEach(([k, v]) => root.style.setProperty(k, v));
-    document.body.className = `theme-${t}`;
+    const targetClass = `theme-${t}`;
+    if (currentTheme !== t) {
+      currentTheme = t;
+      const root = document.documentElement;
+      Object.entries(themes[t]).forEach(([k, v]) => root.style.setProperty(k, v));
+    }
+    if (document.body.className !== targetClass) {
+      document.body.className = targetClass;
+    }
   }
 
   // ===== AUDIO =====
@@ -1282,7 +1303,7 @@
       } catch (err) {}
     }
     state.audio.vol = audio.vol;
-    await saveState();
+    await saveStateThrottled();
     setAudioUI();
   });
 
