@@ -1,7 +1,6 @@
-(() => {
+﻿(() => {
   'use strict';
 
-  // ===== UTILITIES =====
   const $ = (id) => document.getElementById(id);
   const clamp = (n, a, b) => Math.min(b, Math.max(a, n));
   const nowISO = () => new Date().toISOString();
@@ -13,7 +12,6 @@
     } catch (e) {}
   }
 
-  // Haptic patterns per diverse situazioni
   function vibratePulse() {
     safeVibrate([8, 6, 8]);
   }
@@ -75,7 +73,9 @@
     const objects = [];
     objects.push('1 0 obj<< /Type /Catalog /Pages 2 0 R >>endobj');
     objects.push('2 0 obj<< /Type /Pages /Kids [3 0 R] /Count 1 >>endobj');
-    objects.push('3 0 obj<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Contents 5 0 R /Resources << /Font << /F1 4 0 R >> >> >>endobj');
+    objects.push(
+      '3 0 obj<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Contents 5 0 R /Resources << /Font << /F1 4 0 R >> >> >>endobj'
+    );
     objects.push('4 0 obj<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>endobj');
     objects.push(`5 0 obj<< /Length ${content.length} >>stream\n${content}\nendstream\nendobj`);
     let offset = 0;
@@ -115,7 +115,7 @@
     v: 360,
     createdAt: nowISO(),
     name: '',
-    theme: 'forest',
+    theme: 'ember',
     soundEnabled: true,
     haptics: true,
     pinEnabled: false,
@@ -133,6 +133,17 @@
 
   let state = defaultState();
   let sessionPin = null;
+
+  function normalizeState(s) {
+    const base = defaultState();
+    const merged = { ...base, ...s };
+    merged.audio = { ...base.audio, ...(s?.audio || {}) };
+    merged.routines = { ...base.routines, ...(s?.routines || {}) };
+    merged.routines.morning = { ...base.routines.morning, ...(s?.routines?.morning || {}) };
+    merged.routines.evening = { ...base.routines.evening, ...(s?.routines?.evening || {}) };
+    merged.routines.lastReminder = { ...base.routines.lastReminder, ...(s?.routines?.lastReminder || {}) };
+    return merged;
+  }
 
   function getUsers() {
     try {
@@ -234,6 +245,7 @@
       localStorage.setItem(STATE_KEY(), JSON.stringify(state));
     }
   }
+
   async function loadState() {
     const raw = localStorage.getItem(STATE_KEY());
     if (!raw) return defaultState();
@@ -250,93 +262,51 @@
     return parsed || defaultState();
   }
 
-  function normalizeState(s) {
-    const base = defaultState();
-    const merged = { ...base, ...s };
-    merged.audio = { ...base.audio, ...(s?.audio || {}) };
-    merged.routines = { ...base.routines, ...(s?.routines || {}) };
-    merged.routines.morning = { ...base.routines.morning, ...(s?.routines?.morning || {}) };
-    merged.routines.evening = { ...base.routines.evening, ...(s?.routines?.evening || {}) };
-    merged.routines.lastReminder = { ...base.routines.lastReminder, ...(s?.routines?.lastReminder || {}) };
-    return merged;
-  }
-
   // ===== THEMES =====
   const themes = {
-    forest: {
-      '--bg0': '#070b10',
-      '--bg1': '#0b1220',
-      '--bg2': '#0e2a18',
-      '--bg3': '#12331d',
-      '--g1': 'rgba(123,227,179,.95)',
-      '--g2': 'rgba(91,188,255,.85)',
-      '--gold': 'rgba(243,213,154,.92)',
-      '--accent': '#7be3b3',
-      '--accent2': '#5bbcff',
+    ember: {
+      '--bg0': '#140e0a',
+      '--bg1': '#1d1410',
+      '--bg2': '#2a1d16',
+      '--bg3': '#3a2a20',
+      '--accent': '#f5b66c',
+      '--accent2': '#f08b6b',
+      '--text': '#f4ede5',
     },
-    night: {
-      '--bg0': '#050814',
-      '--bg1': '#0a0f1f',
-      '--bg2': '#0d172e',
-      '--bg3': '#132043',
-      '--g1': 'rgba(138,208,255,.92)',
-      '--g2': 'rgba(91,188,255,.85)',
-      '--gold': 'rgba(255,214,139,.92)',
-      '--accent': '#8ad0ff',
-      '--accent2': '#5bbcff',
+    tide: {
+      '--bg0': '#0c141b',
+      '--bg1': '#121d28',
+      '--bg2': '#172734',
+      '--bg3': '#233648',
+      '--accent': '#7bd6ff',
+      '--accent2': '#6fa1ff',
+      '--text': '#eef6fb',
     },
-    dawn: {
-      '--bg0': '#120a10',
-      '--bg1': '#1c0f18',
-      '--bg2': '#2a1522',
-      '--bg3': '#3a1e2c',
-      '--g1': 'rgba(255,182,166,.92)',
-      '--g2': 'rgba(255,195,108,.85)',
-      '--gold': 'rgba(255,224,163,.92)',
-      '--accent': '#ffb6a6',
-      '--accent2': '#ffc36c',
+    meadow: {
+      '--bg0': '#0d1510',
+      '--bg1': '#152118',
+      '--bg2': '#1b2b1f',
+      '--bg3': '#243827',
+      '--accent': '#8ed39c',
+      '--accent2': '#f0c86d',
+      '--text': '#f1f6f2',
     },
-    ocean: {
-      '--bg0': '#0a1f2e',
-      '--bg1': '#0d2a3f',
-      '--bg2': '#0f3a52',
-      '--bg3': '#134361',
-      '--g1': 'rgba(52,211,153,.95)',
-      '--g2': 'rgba(65,176,222,.85)',
-      '--gold': 'rgba(96,165,250,.92)',
-      '--accent': '#34d399',
-      '--accent2': '#41b0de',
-    },
-    mountain: {
-      '--bg0': '#1f1b2e',
-      '--bg1': '#2a1f3a',
-      '--bg2': '#332544',
-      '--bg3': '#3e2f4d',
-      '--g1': 'rgba(244,167,91,.95)',
-      '--g2': 'rgba(241,194,122,.85)',
-      '--gold': 'rgba(251,191,36,.92)',
-      '--accent': '#f4a75b',
-      '--accent2': '#f1c27a',
-    },
-    aurora: {
-      '--bg0': '#0b1418',
-      '--bg1': '#0f1e22',
-      '--bg2': '#12282f',
-      '--bg3': '#15333b',
-      '--g1': 'rgba(34,211,238,.95)',
-      '--g2': 'rgba(94,234,212,.85)',
-      '--gold': 'rgba(240,255,209,.9)',
-      '--accent': '#22d3ee',
-      '--accent2': '#5eead4',
+    dusk: {
+      '--bg0': '#1a111c',
+      '--bg1': '#241726',
+      '--bg2': '#2e1d31',
+      '--bg3': '#3b2740',
+      '--accent': '#dba2ff',
+      '--accent2': '#ff8fb1',
+      '--text': '#f6eef8',
     },
   };
 
   function applyTheme() {
-    const t = themes[state.theme] ? state.theme : 'forest';
+    const t = themes[state.theme] ? state.theme : 'ember';
     state.theme = t;
     const root = document.documentElement;
     Object.entries(themes[t]).forEach(([k, v]) => root.style.setProperty(k, v));
-    document.body.className = `theme-${t}`;
   }
 
   // ===== AUDIO =====
@@ -348,7 +318,7 @@
     if (!AC) return null;
     audio.ctx = new AC();
     audio.master = audio.ctx.createGain();
-    audio.master.gain.value = 0.12; // Volume default piu alto (era 0.0001)
+    audio.master.gain.value = 0.12;
     audio.master.connect(audio.ctx.destination);
     return audio.ctx;
   }
@@ -364,7 +334,7 @@
     o.frequency.setValueAtTime(740, t);
     o.frequency.exponentialRampToValueAtTime(420, t + 0.07);
     g.gain.setValueAtTime(0.0001, t);
-    g.gain.exponentialRampToValueAtTime(0.12, t + 0.01); // Aumentato da 0.05
+    g.gain.exponentialRampToValueAtTime(0.12, t + 0.01);
     g.gain.exponentialRampToValueAtTime(0.0001, t + 0.14);
     o.connect(g);
     g.connect(audio.master || ctx.destination);
@@ -383,33 +353,12 @@
     o.frequency.setValueAtTime(880, t);
     o.frequency.exponentialRampToValueAtTime(1100, t + 0.1);
     g.gain.setValueAtTime(0.0001, t);
-    g.gain.exponentialRampToValueAtTime(0.14, t + 0.02); // Aumentato da 0.06
+    g.gain.exponentialRampToValueAtTime(0.14, t + 0.02);
     g.gain.exponentialRampToValueAtTime(0.0001, t + 0.18);
     o.connect(g);
     g.connect(audio.master || ctx.destination);
     o.start(t);
     o.stop(t + 0.2);
-  }
-
-  function doubleBeep() {
-    if (!state.soundEnabled) return;
-    const ctx = ensureAudioCtx();
-    if (!ctx) return;
-    const t = ctx.currentTime;
-    for (let i = 0; i < 2; i++) {
-      const o = ctx.createOscillator();
-      const g = ctx.createGain();
-      o.type = 'sine';
-      o.frequency.value = 620 + i * 150;
-      const startTime = t + i * 0.12;
-      g.gain.setValueAtTime(0.0001, startTime);
-      g.gain.exponentialRampToValueAtTime(0.10, startTime + 0.01); // Aumentato da 0.04
-      g.gain.exponentialRampToValueAtTime(0.0001, startTime + 0.1);
-      o.connect(g);
-      g.connect(audio.master || ctx.destination);
-      o.start(startTime);
-      o.stop(startTime + 0.12);
-    }
   }
 
   function buildAmbience(ctx, env) {
@@ -425,7 +374,6 @@
     ns.loop = true;
     const lp = ctx.createBiquadFilter();
     lp.type = 'lowpass';
-    // Configurazione per diversi ambienti
     const envConfig = {
       forest: { lpFreq: 950, nsGain: 0.22, base: 207.65, lfoVal: 5 },
       rain: { lpFreq: 850, nsGain: 0.32, base: 196, lfoVal: 9 },
@@ -509,15 +457,15 @@
     const volLbl = $('volLbl');
     const status = $('audioStatus');
     const toggle = $('audioToggle');
-
     if (env) env.value = audio.env;
     if (vol) vol.value = Math.round(audio.vol * 100);
     if (volLbl) volLbl.textContent = Math.round(audio.vol * 100) + '%';
     if (toggle) toggle.textContent = audio.on ? 'Pausa' : 'Avvia';
-    if (status)
+    if (status) {
       status.textContent = audio.on
         ? `In riproduzione, volume ${Math.round(audio.vol * 100)}%`
         : 'Pronto. Tocca Avvia per iniziare.';
+    }
   }
 
   async function audioStart() {
@@ -572,10 +520,10 @@
     setAudioUI();
   }
 
-  // ===== ADVICE & QUOTES =====
+  // ===== ADVICE & TAGS =====
   const advice = {
     calm: [
-      'Fai 3 respiri lenti: espira pi\u00f9 a lungo.',
+      'Fai 3 respiri lenti: espira piu a lungo.',
       'Metti una mano sul petto: "Sono qui."',
       'Scegli una cosa semplice da fare con calma.',
     ],
@@ -608,6 +556,7 @@
     'gratitudine',
   ];
 
+  // ===== BREATH TIMER =====
   let breathTimer = null;
   let breathEndsAt = 0;
   let breathDuration = 180;
@@ -716,13 +665,12 @@
       const hasMood = !!today;
       const hasJournal = !!state.journal.find((j) => j.date === todayKey());
       let text = 'Un check-in rapido ti aspetta.';
-      if (hasMood && hasJournal) text = 'Umore e diario di oggi sono gia\' registrati.';
+      if (hasMood && hasJournal) text = 'Umore e diario di oggi sono gia registrati.';
       else if (hasMood) text = 'Umore registrato. Vuoi aggiungere una nota?';
       else if (hasJournal) text = 'Diario pronto. Vuoi registrare anche l\'umore?';
       welcomeSub.textContent = text;
     }
-    const lockBtn = $('btnLock');
-    if (lockBtn) lockBtn.classList.toggle('is-active', state.lockEnabled);
+
     const lockStatus = $('lockStatus');
     if (lockStatus) lockStatus.textContent = state.lockEnabled ? 'Attivo al prossimo avvio' : 'Disattivato';
     setAudioUI();
@@ -763,6 +711,64 @@
 
   $('mCancel')?.addEventListener('click', () => closeModal(false));
   $('mOk')?.addEventListener('click', () => closeModal(true));
+
+  // ===== INSIGHTS =====
+  function moodsSince(days) {
+    const cutoff = Date.now() - days * 24 * 60 * 60 * 1000;
+    return state.moods.filter((m) => new Date(m.date).getTime() >= cutoff);
+  }
+
+  function topTags(limit = 5) {
+    const counts = {};
+    state.moods.forEach((m) => {
+      (m.tags || []).forEach((tag) => {
+        counts[tag] = (counts[tag] || 0) + 1;
+      });
+    });
+    return Object.entries(counts)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, limit)
+      .map(([tag, count]) => `${tag} (${count})`);
+  }
+
+  function exportMoodCsv() {
+    const headers = ['date', 'mood', 'energy', 'tags', 'gratitude', 'note'];
+    const rows = state.moods.map((m) => [
+      m.date,
+      m.mood,
+      m.energy ?? '',
+      (m.tags || []).join('|'),
+      (m.gratitude || '').replace(/\n/g, ' '),
+      (m.note || '').replace(/\n/g, ' '),
+    ]);
+    const csv = [headers.join(','), ...rows.map((r) => r.map((v) => `"${String(v).replace(/"/g, '""')}"`).join(','))].join('\n');
+    downloadBlob(new Blob([csv], { type: 'text/csv;charset=utf-8' }), `AURA_mood_${todayKey()}.csv`);
+    toast('Export CSV creato');
+  }
+
+  function exportInsightsPdf() {
+    const last7 = moodsSince(7);
+    const last30 = moodsSince(30);
+    const avgEnergy7 = last7.length ? Math.round(last7.reduce((s, m) => s + (m.energy ?? 55), 0) / last7.length) : 0;
+    const avgEnergy30 = last30.length ? Math.round(last30.reduce((s, m) => s + (m.energy ?? 55), 0) / last30.length) : 0;
+    const tags = topTags(6);
+    const lines = [
+      'AURA - Riepilogo locale',
+      `Data: ${fmtDateShort(new Date())}`,
+      '',
+      `Check-in totali: ${state.moods.length}`,
+      `Energia media 7 giorni: ${avgEnergy7}%`,
+      `Energia media 30 giorni: ${avgEnergy30}%`,
+      '',
+      'Tag piu frequenti:',
+      ...(tags.length ? tags : ['Nessun tag']),
+      '',
+      'Nota: dati solo locali, nessuna sincronizzazione.',
+    ];
+    const pdf = buildSimplePdf(lines);
+    downloadBlob(new Blob([pdf], { type: 'application/pdf' }), `AURA_insights_${todayKey()}.pdf`);
+    toast('Export PDF creato');
+  }
 
   // ===== DIALOGS =====
   async function moodDialog() {
@@ -806,7 +812,7 @@
     `;
     const confirmP = openModal({
       title: 'Come ti senti oggi?',
-      body: current ? `Oggi risulta gia' registrato: <b>${currentLabel}</b>. Puoi aggiornare.` : 'Scegli una parola semplice.',
+      body: current ? `Oggi risulta gia registrato: <b>${currentLabel}</b>. Puoi aggiornare.` : 'Scegli una parola semplice.',
       contentHTML: html,
       okText: 'Salva',
       cancelText: 'Annulla',
@@ -816,8 +822,8 @@
     const paint = () =>
       buttons.forEach((b) => {
         const on = b.getAttribute('data-mood') === picked;
-        b.style.borderColor = on ? 'rgba(111,227,166,.7)' : 'rgba(255,255,255,.14)';
-        b.style.background = on ? 'rgba(111,227,166,.12)' : 'rgba(255,255,255,.06)';
+        b.style.borderColor = on ? 'rgba(245,182,108,.7)' : 'rgba(255,255,255,.14)';
+        b.style.background = on ? 'rgba(245,182,108,.16)' : 'rgba(255,255,255,.06)';
       });
     const paintTags = () =>
       tagButtons.forEach((b) => {
@@ -979,13 +985,7 @@
         return;
       }
       const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = `AURA_diario_${todayKey()}.txt`;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      setTimeout(() => URL.revokeObjectURL(a.href), 800);
+      downloadBlob(blob, `AURA_diario_${todayKey()}.txt`);
       toast('Export creato');
     });
     modal?.querySelector('#jClear')?.addEventListener('click', () => {
@@ -1012,79 +1012,24 @@
 
   async function journeyDialog() {
     const steps = new Set(state.moods.map((m) => m.date)).size;
+    const quote = quotes[Math.floor(Math.random() * quotes.length)];
     const html = `<div style="background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.1); border-radius:12px; padding:12px; margin-bottom:12px">
       <div style="font-weight:700; margin-bottom:6px">Passi nella foresta</div>
       <div style="font-family:var(--font-title); font-size:34px">${steps}</div>
       <div style="font-size:12px; color:var(--dim)">Un passo = un giorno con umore registrato.</div>
     </div>
-    <div style="background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.1); border-radius:12px; padding:12px">
+    <div style="background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.1); border-radius:12px; padding:12px; margin-bottom:12px">
       <div style="font-weight:700; margin-bottom:6px">Rituale rapido</div>
       <div style="font-size:14px; color:var(--dim)">1) Umore - 2) 30s Respiro - 3) Micro-obiettivo gentile.</div>
-    </div>`;
+    </div>
+    <div style="font-size:13px; color:var(--dim)">${quote}</div>`;
     await openModal({
       title: 'Percorso',
-      body: 'Ogni giorno e\' un passo nella foresta.',
+      body: 'Ogni giorno e un passo nella foresta.',
       contentHTML: html,
       okText: 'Ok',
       cancelText: 'Chiudi',
     });
-  }
-
-  function moodsSince(days) {
-    const cutoff = Date.now() - days * 24 * 60 * 60 * 1000;
-    return state.moods.filter((m) => new Date(m.date).getTime() >= cutoff);
-  }
-
-  function topTags(limit = 5) {
-    const counts = {};
-    state.moods.forEach((m) => {
-      (m.tags || []).forEach((tag) => {
-        counts[tag] = (counts[tag] || 0) + 1;
-      });
-    });
-    return Object.entries(counts)
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, limit)
-      .map(([tag, count]) => `${tag} (${count})`);
-  }
-
-  function exportMoodCsv() {
-    const headers = ['date', 'mood', 'energy', 'tags', 'gratitude', 'note'];
-    const rows = state.moods.map((m) => [
-      m.date,
-      m.mood,
-      m.energy ?? '',
-      (m.tags || []).join('|'),
-      (m.gratitude || '').replace(/\n/g, ' '),
-      (m.note || '').replace(/\n/g, ' '),
-    ]);
-    const csv = [headers.join(','), ...rows.map((r) => r.map((v) => `"${String(v).replace(/"/g, '""')}"`).join(','))].join('\n');
-    downloadBlob(new Blob([csv], { type: 'text/csv;charset=utf-8' }), `AURA_mood_${todayKey()}.csv`);
-    toast('Export CSV creato');
-  }
-
-  function exportInsightsPdf() {
-    const last7 = moodsSince(7);
-    const last30 = moodsSince(30);
-    const avgEnergy7 = last7.length ? Math.round(last7.reduce((s, m) => s + (m.energy ?? 55), 0) / last7.length) : 0;
-    const avgEnergy30 = last30.length ? Math.round(last30.reduce((s, m) => s + (m.energy ?? 55), 0) / last30.length) : 0;
-    const tags = topTags(6);
-    const lines = [
-      'AURA - Riepilogo locale',
-      `Data: ${fmtDateShort(new Date())}`,
-      '',
-      `Check-in totali: ${state.moods.length}`,
-      `Energia media 7 giorni: ${avgEnergy7}%`,
-      `Energia media 30 giorni: ${avgEnergy30}%`,
-      '',
-      'Tag piu frequenti:',
-      ...(tags.length ? tags : ['Nessun tag']),
-      '',
-      'Nota: dati solo locali, nessuna sincronizzazione.',
-    ];
-    const pdf = buildSimplePdf(lines);
-    downloadBlob(new Blob([pdf], { type: 'application/pdf' }), `AURA_insights_${todayKey()}.pdf`);
-    toast('Export PDF creato');
   }
 
   async function statsDialog() {
@@ -1106,7 +1051,7 @@
     const max = Math.max(1, ...Object.values(counts));
     const row = (label, val) => `<div style="display:flex; align-items:center; justify-content:space-between; gap:10px; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.1); border-radius:12px; padding:12px; margin-bottom:10px">
       <div><div style="font-weight:700">${label}</div><div style="font-size:12px; color:var(--dim)">${val} / ${last.length}</div></div>
-      <div style="width:100px; height:8px; border-radius:999px; background:rgba(255,255,255,.08); overflow:hidden"><div style="height:100%; width:${Math.round((val / max) * 100)}%; background:linear-gradient(135deg,var(--g1),var(--g2))"></div></div></div>`;
+      <div style="width:100px; height:8px; border-radius:999px; background:rgba(255,255,255,.08); overflow:hidden"><div style="height:100%; width:${Math.round((val / max) * 100)}%; background:linear-gradient(135deg,var(--accent),var(--accent2))"></div></div></div>`;
     const last7 = moodsSince(7);
     const prev7 = moodsSince(14).filter((m) => new Date(m.date).getTime() < Date.now() - 7 * 24 * 60 * 60 * 1000);
     const avgEnergy7 = last7.length ? Math.round(last7.reduce((s, m) => s + (m.energy ?? 55), 0) / last7.length) : 0;
@@ -1149,13 +1094,11 @@
     const html = `
       <div style="background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.1); border-radius:12px; padding:12px; margin-bottom:12px">
         <div style="font-weight:700; margin-bottom:10px">Tema</div>
-        <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px">
-          <button class="ghost" data-theme="forest" style="padding:12px">Foresta</button>
-          <button class="ghost" data-theme="night" style="padding:12px">Notte</button>
-          <button class="ghost" data-theme="dawn" style="padding:12px">Alba</button>
-          <button class="ghost" data-theme="ocean" style="padding:12px">Oceano</button>
-          <button class="ghost" data-theme="mountain" style="padding:12px">Montagna</button>
-          <button class="ghost" data-theme="aurora" style="padding:12px">Aurora</button>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px">
+          <button class="ghost" data-theme="ember" style="padding:12px">Ember</button>
+          <button class="ghost" data-theme="tide" style="padding:12px">Tide</button>
+          <button class="ghost" data-theme="meadow" style="padding:12px">Meadow</button>
+          <button class="ghost" data-theme="dusk" style="padding:12px">Dusk</button>
         </div>
       </div>
       <div style="background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.1); border-radius:12px; padding:12px; margin-bottom:12px">
@@ -1165,7 +1108,7 @@
           <button class="ghost" id="sSound" style="padding:12px">${state.soundEnabled ? 'Audio attivo' : 'Audio disattivo'}</button>
           <button class="ghost" id="sHaptics" style="padding:12px">${state.haptics ? 'Haptics attivi' : 'Haptics disattivi'}</button>
         </div>
-        <div style="font-size:12px; color:var(--dim); margin-top:10px">Su iPhone la vibrazione puo' essere limitata da iOS.</div>
+        <div style="font-size:12px; color:var(--dim); margin-top:10px">Su iPhone la vibrazione puo essere limitata da iOS.</div>
       </div>
       <div style="background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.1); border-radius:12px; padding:12px; margin-bottom:12px">
         <div style="font-weight:700; margin-bottom:10px">Privacy</div>
@@ -1175,7 +1118,7 @@
       <div style="background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.1); border-radius:12px; padding:12px; margin-bottom:12px">
         <div style="font-weight:700; margin-bottom:10px">Routine e promemoria</div>
         <button class="ghost" id="sReminders" style="width:100%; padding:12px">${state.remindersEnabled ? 'Promemoria attivi' : 'Promemoria disattivi'}</button>
-        <div style="font-size:12px; color:var(--dim); margin-top:10px">I promemoria funzionano solo se l'app e' aperta.</div>
+        <div style="font-size:12px; color:var(--dim); margin-top:10px">I promemoria funzionano solo se l'app e aperta.</div>
         <div style="margin-top:12px; display:grid; gap:10px">
           <div style="background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.1); border-radius:12px; padding:10px">
             <div style="font-weight:700; margin-bottom:8px">Mattina</div>
@@ -1289,13 +1232,7 @@
     modal?.querySelector('#sExport')?.addEventListener('click', () => {
       softClick();
       const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json;charset=utf-8' });
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = `AURA_export_${getCurrentUser() || 'guest'}_${todayKey()}.json`;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      setTimeout(() => URL.revokeObjectURL(a.href), 800);
+      downloadBlob(blob, `AURA_export_${getCurrentUser() || 'guest'}_${todayKey()}.json`);
       toast('Export creato');
     });
     modal?.querySelector('#sReset')?.addEventListener('click', async () => {
@@ -1355,7 +1292,6 @@
       await saveState();
       vibrateSuccess();
       successBeep();
-      doubleBeep();
       toast('PIN impostato');
       render();
     });
@@ -1364,9 +1300,9 @@
 
   async function runDemo() {
     const steps = [
-      { id: 'bMood', text: '1/3 Tocca "Umore" e scegli come stai.' },
+      { id: 'bMood', text: '1/3 Tocca "Check-in ora" per iniziare.' },
       { id: 'bBreath', text: '2/3 Prova "Respiro".' },
-      { id: 'btnAudio', text: '3/3 Attiva "Audio" per rendere tutto piu rilassante.' },
+      { id: 'btnAudio', text: '3/3 Attiva "Audio" per un ambiente piu rilassante.' },
     ];
     const hint = $('hint');
     for (const s of steps) {
@@ -1394,17 +1330,19 @@
     const paint = () => {
       const on = mode === 'login';
       if (tabLogin) {
-        tabLogin.style.borderColor = on ? 'rgba(111,227,166,.7)' : 'rgba(255,255,255,.14)';
-        tabLogin.style.background = on ? 'rgba(111,227,166,.12)' : 'rgba(255,255,255,.06)';
+        tabLogin.style.borderColor = on ? 'rgba(245,182,108,.7)' : 'rgba(255,255,255,.14)';
+        tabLogin.style.background = on ? 'rgba(245,182,108,.16)' : 'rgba(255,255,255,.06)';
       }
       if (tabReg) {
-        tabReg.style.borderColor = !on ? 'rgba(111,227,166,.7)' : 'rgba(255,255,255,.14)';
-        tabReg.style.background = !on ? 'rgba(111,227,166,.12)' : 'rgba(255,255,255,.06)';
+        tabReg.style.borderColor = !on ? 'rgba(245,182,108,.7)' : 'rgba(255,255,255,.14)';
+        tabReg.style.background = !on ? 'rgba(245,182,108,.16)' : 'rgba(255,255,255,.06)';
       }
       if (extra) extra.style.display = mode === 'reg' ? 'block' : 'none';
       if (authPass) authPass.setAttribute('autocomplete', mode === 'reg' ? 'new-password' : 'current-password');
       if (hint)
-        hint.textContent = mode === 'reg' ? 'Registrazione locale: credenziali solo sul dispositivo.' : 'Accesso locale: nessun invio a server.';
+        hint.textContent = mode === 'reg'
+          ? 'Registrazione locale: credenziali solo sul dispositivo.'
+          : 'Accesso locale: nessun invio a server.';
     };
     paint();
     tabLogin?.addEventListener('click', () => {
@@ -1441,7 +1379,7 @@
           return;
         }
         if (existing) {
-          if (hint) hint.textContent = 'Utente gia\' presente su questo dispositivo.';
+          if (hint) hint.textContent = 'Utente gia presente su questo dispositivo.';
           safeVibrate([12, 40, 12]);
           return;
         }
@@ -1533,7 +1471,7 @@
       }
       sessionPin = pin;
       try {
-      state = normalizeState(await loadState());
+        state = normalizeState(await loadState());
         audio.env = state.audio?.env || 'forest';
         audio.vol = state.audio?.vol ?? 0.4;
         const lock = $('lock');
@@ -1550,39 +1488,38 @@
     });
   }
 
-  // ===== VISUAL EFFECTS =====
-  function setupVisualEffects() {
-    const stars = $('stars');
-    if (stars && !stars.childElementCount) {
-      for (let i = 0; i < 38; i++) {
-        const s = document.createElement('div');
-        s.className = 'star';
-        s.style.left = (Math.random() * 100).toFixed(2) + '%';
-        s.style.top = (Math.random() * 55).toFixed(2) + '%';
-        s.style.animationDelay = (Math.random() * 4).toFixed(2) + 's';
-        s.style.opacity = (0.25 + Math.random() * 0.65).toFixed(2);
-        stars.appendChild(s);
-      }
-    }
+  // ===== ROUTINE REMINDERS =====
+  let reminderTimer = null;
 
-    const particles = $('particles');
-    const particleGlyphs = ['*', '+', '.', '~'];
-    function spawnParticle() {
-      if (!particles) return;
-      const p = document.createElement('div');
-      p.className = 'p';
-      p.textContent = particleGlyphs[Math.floor(Math.random() * particleGlyphs.length)];
-      p.style.left = (Math.random() * 100).toFixed(2) + '%';
-      p.style.animationDuration = (8 + Math.random() * 9).toFixed(2) + 's';
-      p.style.animationDelay = (Math.random() * 2).toFixed(2) + 's';
-      particles.appendChild(p);
-      setTimeout(() => p.remove(), 20000);
-    }
-    for (let i = 0; i < 10; i++) spawnParticle();
-    setInterval(spawnParticle, 1700);
+  function checkRoutineReminder() {
+    if (!state.remindersEnabled) return;
+    const now = new Date();
+    const time = now.toTimeString().slice(0, 5);
+    const today = todayKey();
+    const routines = [
+      { key: 'morning', label: 'Routine mattina' },
+      { key: 'evening', label: 'Routine sera' },
+    ];
+    routines.forEach(({ key, label }) => {
+      const routine = state.routines[key];
+      if (!routine?.enabled) return;
+      if (routine.time !== time) return;
+      if (state.routines.lastReminder[key] === today) return;
+      if (routine.lastDone === today) return;
+      state.routines.lastReminder[key] = today;
+      saveState().catch(() => {});
+      toast(`${label}: e il tuo momento`);
+      vibratePulse();
+    });
   }
 
-  // ===== EVENT LISTENERS =====
+  function setupRoutineReminders() {
+    if (reminderTimer) clearInterval(reminderTimer);
+    reminderTimer = setInterval(checkRoutineReminder, 60000);
+    checkRoutineReminder();
+  }
+
+  // ===== EVENTS =====
   $('elfWrap')?.addEventListener('click', () => {
     softClick();
     vibratePulse();
@@ -1695,72 +1632,8 @@
   setTime();
   setInterval(setTime, 15000);
 
-  // ===== TOUCH GESTURES =====
-  let touchStartY = 0;
-  let touchStartX = 0;
-
-  document.addEventListener('touchstart', (e) => {
-    touchStartY = e.touches[0].clientY;
-    touchStartX = e.touches[0].clientX;
-  }, { passive: true });
-
-  let reminderTimer = null;
-
-  function checkRoutineReminder() {
-    if (!state.remindersEnabled) return;
-    const now = new Date();
-    const time = now.toTimeString().slice(0, 5);
-    const today = todayKey();
-    const routines = [
-      { key: 'morning', label: 'Routine mattina' },
-      { key: 'evening', label: 'Routine sera' },
-    ];
-    routines.forEach(({ key, label }) => {
-      const routine = state.routines[key];
-      if (!routine?.enabled) return;
-      if (routine.time !== time) return;
-      if (state.routines.lastReminder[key] === today) return;
-      if (routine.lastDone === today) return;
-      state.routines.lastReminder[key] = today;
-      saveState().catch(() => {});
-      toast(`${label}: e' il tuo momento`);
-      vibratePulse();
-    });
-  }
-
-  function setupRoutineReminders() {
-    if (reminderTimer) clearInterval(reminderTimer);
-    reminderTimer = setInterval(checkRoutineReminder, 60000);
-    checkRoutineReminder();
-  }
-
-  document.addEventListener('touchend', (e) => {
-    if (!e.changedTouches || e.changedTouches.length === 0) return;
-    const touchEndY = e.changedTouches[0].clientY;
-    const touchEndX = e.changedTouches[0].clientX;
-    const deltaY = touchEndY - touchStartY;
-    const deltaX = touchEndX - touchStartX;
-
-    // Swipe down to close modal or audio panel
-    if (deltaY > 80) {
-      const modal = $('modal');
-      if (modal && modal.style.display === 'flex') {
-        closeModal(false);
-        vibrateDouble();
-        return;
-      }
-      const audioPanel = $('audioPanel');
-      if (audioPanel && audioPanel.classList.contains('open')) {
-        audioPanel.classList.remove('open');
-        softClick();
-        vibrateDouble();
-      }
-    }
-  }, { passive: true });
-
   // ===== BOOT =====
   async function boot() {
-    setupVisualEffects();
     if ('serviceWorker' in navigator) {
       try {
         await navigator.serviceWorker.register('./sw.js');
