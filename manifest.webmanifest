@@ -1,13 +1,13 @@
 {
-  "name": "AURA 3.6.0 - Elfo nella Foresta",
+  "name": "AURA 3.6.0 - Rituals of Calm",
   "short_name": "AURA",
-  "description": "Guida il tuo respiro con un elfo nella foresta. Privacy first, tutto locale.",
+  "description": "Benessere personale con umore, respiro e diario. Tutto locale.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait-primary",
-  "background_color": "#0b1220",
-  "theme_color": "#0e2a18",
+  "background_color": "#f4efe6",
+  "theme_color": "#f4efe6",
   "categories": ["health", "wellness"],
   "screenshots": [
     {
@@ -36,49 +36,5 @@
       "type": "image/png",
       "purpose": "any maskable"
     }
-  ],
-  "shortcuts": [
-    {
-      "name": "Registra umore",
-      "short_name": "Umore",
-      "description": "Registra rapidamente il tuo umore di oggi",
-      "url": "./?view=mood",
-      "icons": [
-        {
-          "src": "./icons/icon-192.png",
-          "sizes": "192x192"
-        }
-      ]
-    },
-    {
-      "name": "Respiro guidato",
-      "short_name": "Respira",
-      "description": "Accedi a una sessione di respiro guidato",
-      "url": "./?view=breath",
-      "icons": [
-        {
-          "src": "./icons/icon-192.png",
-          "sizes": "192x192"
-        }
-      ]
-    }
-  ],
-  "share_target": {
-    "action": "./",
-    "method": "POST",
-    "enctype": "multipart/form-data",
-    "params": {
-      "title": "title",
-      "text": "text",
-      "files": [
-        {
-          "name": "files",
-          "accept": [
-            "application/json",
-            "text/plain"
-          ]
-        }
-      ]
-    }
-  }
+  ]
 }

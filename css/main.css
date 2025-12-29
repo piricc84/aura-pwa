@@ -1,18 +1,18 @@
 :root {
-  --bg0: #140e0a;
-  --bg1: #1d1410;
-  --bg2: #2a1d16;
-  --bg3: #3a2a20;
-  --text: #f4ede5;
-  --dim: rgba(244, 237, 229, 0.7);
-  --dim2: rgba(244, 237, 229, 0.5);
-  --accent: #f5b66c;
-  --accent2: #f08b6b;
-  --card: rgba(255, 255, 255, 0.06);
-  --card2: rgba(255, 255, 255, 0.12);
-  --shadow: rgba(0, 0, 0, 0.35);
-  --font-body: "Outfit", system-ui, -apple-system, "Segoe UI", Roboto, Arial;
-  --font-title: "Source Serif 4", serif;
+  --bg0: #f4efe6;
+  --bg1: #efe6d8;
+  --bg2: #e5d8c7;
+  --bg3: #d6c7b0;
+  --text: #1d1c1a;
+  --dim: rgba(29, 28, 26, 0.7);
+  --dim2: rgba(29, 28, 26, 0.5);
+  --accent: #1f7f78;
+  --accent2: #e08a4f;
+  --card: rgba(0, 0, 0, 0.04);
+  --card2: rgba(0, 0, 0, 0.1);
+  --shadow: rgba(19, 13, 9, 0.18);
+  --font-body: "Space Grotesk", system-ui, -apple-system, "Segoe UI", Roboto, Arial;
+  --font-title: "Fraunces", serif;
 }
 
 * {
@@ -31,7 +31,9 @@ body {
   padding-bottom: env(safe-area-inset-bottom);
   font-family: var(--font-body);
   color: var(--text);
-  background: linear-gradient(180deg, #140e0a, #22150d 45%, #120b08);
+  background: radial-gradient(1200px 800px at 20% -10%, rgba(31, 127, 120, 0.12), transparent 60%),
+    radial-gradient(900px 700px at 80% 20%, rgba(224, 138, 79, 0.12), transparent 55%),
+    linear-gradient(180deg, var(--bg0), var(--bg1) 55%, var(--bg2));
   overflow: hidden;
 }
 
@@ -55,7 +57,7 @@ body {
   display: grid;
   place-items: center;
   padding: 24px 16px;
-  background: radial-gradient(900px 600px at 30% -20%, rgba(245, 182, 108, 0.2), transparent 65%),
+  background: radial-gradient(900px 600px at 30% -20%, rgba(31, 127, 120, 0.12), transparent 65%),
     linear-gradient(180deg, var(--bg0), var(--bg1));
   z-index: 50;
 }
@@ -75,16 +77,16 @@ body {
   place-items: center;
   font-family: var(--font-title);
   font-size: 28px;
-  background: radial-gradient(circle at 30% 30%, rgba(245, 182, 108, 0.9), rgba(240, 139, 107, 0.6) 45%, rgba(255, 255, 255, 0.12));
+  background: radial-gradient(circle at 30% 30%, rgba(31, 127, 120, 0.85), rgba(224, 138, 79, 0.6) 45%, rgba(255, 255, 255, 0.3));
   box-shadow: 0 18px 38px var(--shadow);
 }
 
 .card {
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid var(--card2);
   border-radius: 18px;
   padding: 14px;
-  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 16px 36px var(--shadow);
 }
 
 .tabRow {
@@ -131,8 +133,8 @@ body {
 .backdropGlow {
   position: absolute;
   inset: -30%;
-  background: radial-gradient(circle at 20% 20%, rgba(245, 182, 108, 0.2), transparent 55%),
-    radial-gradient(circle at 70% 30%, rgba(240, 139, 107, 0.18), transparent 60%);
+  background: radial-gradient(circle at 20% 20%, rgba(31, 127, 120, 0.16), transparent 55%),
+    radial-gradient(circle at 70% 30%, rgba(224, 138, 79, 0.14), transparent 60%);
   filter: blur(24px);
   opacity: 0.8;
   animation: slowDrift 18s ease-in-out infinite;
@@ -141,17 +143,17 @@ body {
 .backdropGrid {
   position: absolute;
   inset: 0;
-  opacity: 0.1;
-  background-image: linear-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.06) 1px, transparent 1px);
+  opacity: 0.2;
+  background-image: linear-gradient(rgba(29, 28, 26, 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(29, 28, 26, 0.04) 1px, transparent 1px);
   background-size: 32px 32px;
 }
 
 .backdropOrbs {
   position: absolute;
   inset: 0;
-  background: radial-gradient(220px 200px at 80% 75%, rgba(255, 255, 255, 0.12), transparent 60%),
-    radial-gradient(140px 140px at 10% 65%, rgba(255, 255, 255, 0.08), transparent 65%);
+  background: radial-gradient(220px 200px at 80% 75%, rgba(31, 127, 120, 0.12), transparent 60%),
+    radial-gradient(140px 140px at 10% 65%, rgba(224, 138, 79, 0.12), transparent 65%);
 }
 
 @keyframes slowDrift {
@@ -184,8 +186,8 @@ body {
   width: 40px;
   height: 40px;
   border-radius: 16px;
-  background: linear-gradient(135deg, rgba(245, 182, 108, 0.9), rgba(240, 139, 107, 0.8));
-  box-shadow: 0 12px 28px var(--shadow);
+  background: linear-gradient(135deg, rgba(31, 127, 120, 0.9), rgba(224, 138, 79, 0.85));
+  box-shadow: 0 12px 28px rgba(31, 127, 120, 0.25);
   display: grid;
   place-items: center;
   font-weight: 700;
@@ -221,8 +223,8 @@ body {
   height: 34px;
   padding: 0 12px;
   border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--card2);
+  background: rgba(255, 255, 255, 0.7);
   color: var(--text);
   font-size: 11px;
   letter-spacing: 0.7px;
@@ -243,9 +245,9 @@ body {
   flex: 1;
   min-height: 280px;
   border-radius: 26px;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.04));
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 22px 46px rgba(0, 0, 0, 0.3);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(244, 239, 230, 0.85));
+  border: 1px solid var(--card2);
+  box-shadow: 0 22px 46px rgba(31, 24, 18, 0.2);
   padding: 16px;
   display: flex;
   flex-direction: column;
@@ -273,8 +275,8 @@ body {
   gap: 6px;
   padding: 6px 10px;
   border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--card2);
+  background: rgba(255, 255, 255, 0.75);
   font-size: 11px;
   font-weight: 700;
 }
@@ -312,8 +314,8 @@ body {
   margin-top: 12px;
   padding: 10px 16px;
   border-radius: 14px;
-  background: linear-gradient(135deg, rgba(245, 182, 108, 0.9), rgba(240, 139, 107, 0.8));
-  color: #25160f;
+  background: linear-gradient(135deg, rgba(31, 127, 120, 0.9), rgba(224, 138, 79, 0.85));
+  color: #f9f4ee;
   font-weight: 700;
 }
 
@@ -338,7 +340,7 @@ body {
   width: 170px;
   height: 170px;
   border-radius: 999px;
-  background: radial-gradient(circle, rgba(245, 182, 108, 0.25), transparent 60%);
+  background: radial-gradient(circle, rgba(31, 127, 120, 0.22), transparent 60%);
   animation: glowPulse 5.2s ease-in-out infinite;
   filter: blur(2px);
 }
@@ -359,7 +361,7 @@ body {
   position: relative;
   transform-origin: 50% 90%;
   animation: float 5.8s ease-in-out infinite;
-  filter: drop-shadow(0 18px 28px rgba(0, 0, 0, 0.35));
+  filter: drop-shadow(0 18px 28px rgba(31, 24, 18, 0.22));
 }
 
 @keyframes float {
@@ -379,10 +381,10 @@ body {
   transform: translateX(-50%);
   width: 100px;
   height: 70px;
-  background: linear-gradient(135deg, rgba(245, 182, 108, 0.95), rgba(240, 139, 107, 0.55));
+  background: linear-gradient(135deg, rgba(31, 127, 120, 0.85), rgba(224, 138, 79, 0.6));
   border-radius: 80px 80px 18px 18px;
   clip-path: polygon(10% 82%, 30% 10%, 62% 18%, 88% 82%, 70% 100%, 50% 92%, 30% 100%);
-  border: 1px solid rgba(255, 255, 255, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.35);
 }
 
 .hat::after {
@@ -393,8 +395,8 @@ body {
   width: 10px;
   height: 10px;
   border-radius: 99px;
-  background: rgba(255, 255, 255, 0.75);
-  box-shadow: 0 0 0 6px rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.85);
+  box-shadow: 0 0 0 6px rgba(31, 127, 120, 0.12);
   animation: twinkle 3.5s ease-in-out infinite;
 }
 
@@ -506,8 +508,8 @@ body {
 }
 
 .miniCard {
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid var(--card2);
   border-radius: 14px;
   padding: 10px;
 }
@@ -539,8 +541,8 @@ body {
 .cardBtn {
   padding: 12px 14px;
   border-radius: 16px;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid var(--card2);
   color: var(--text);
   text-align: left;
   display: flex;
@@ -570,14 +572,14 @@ body {
   right: 14px;
   max-width: 492px;
   margin: 0 auto;
-  background: rgba(20, 14, 10, 0.95);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid var(--card2);
   border-radius: 24px;
   backdrop-filter: blur(12px);
   z-index: 20;
   transition: bottom 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
   padding: 16px;
-  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 24px 64px rgba(31, 24, 18, 0.22);
 }
 
 .audioPanel.open {
@@ -609,7 +611,7 @@ body {
 .panelBtn {
   padding: 8px 12px;
   border-radius: 10px;
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.7);
   color: var(--text);
 }
 
@@ -650,16 +652,16 @@ body {
 .chip {
   padding: 8px 12px;
   border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--card2);
+  background: rgba(255, 255, 255, 0.7);
   color: var(--text);
   font-size: 12px;
   font-weight: 600;
 }
 
 .chip.is-on {
-  border-color: rgba(245, 182, 108, 0.7);
-  background: rgba(245, 182, 108, 0.2);
+  border-color: rgba(31, 127, 120, 0.5);
+  background: rgba(31, 127, 120, 0.18);
 }
 
 .timerBox {
@@ -668,8 +670,8 @@ body {
   text-align: center;
   padding: 12px;
   border-radius: 16px;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid var(--card2);
 }
 
 .timerValue {
@@ -691,7 +693,7 @@ body {
 .overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.6);
+  background: rgba(29, 28, 26, 0.35);
   backdrop-filter: blur(8px);
   z-index: 100;
   opacity: 0;
@@ -711,8 +713,8 @@ body {
   bottom: 0;
   max-width: 520px;
   margin: 0 auto;
-  background: var(--bg1);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid var(--card2);
   border-radius: 28px 28px 0 0;
   padding: 20px 16px 30px;
   z-index: 101;
@@ -724,7 +726,7 @@ body {
 .sheetHandle {
   height: 4px;
   width: 36px;
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(29, 28, 26, 0.2);
   border-radius: 2px;
   margin: 0 auto 16px;
 }
@@ -749,8 +751,8 @@ select,
 textarea {
   width: 100%;
   padding: 12px 14px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--card2);
+  background: rgba(255, 255, 255, 0.8);
   border-radius: 12px;
   color: var(--text);
   font-size: 14px;
@@ -763,7 +765,7 @@ select:focus,
 textarea:focus {
   outline: none;
   border-color: var(--accent);
-  background: rgba(255, 255, 255, 0.09);
+  background: rgba(255, 255, 255, 0.95);
 }
 
 button {
@@ -775,24 +777,24 @@ button {
   padding: 10px 16px;
   border-radius: 12px;
   color: var(--text);
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.75);
 }
 
 button.primary {
-  background: linear-gradient(135deg, rgba(245, 182, 108, 0.9), rgba(240, 139, 107, 0.8));
-  color: #24160f;
+  background: linear-gradient(135deg, rgba(31, 127, 120, 0.9), rgba(224, 138, 79, 0.85));
+  color: #f9f4ee;
 }
 
 button.ghost {
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--card2);
+  background: rgba(255, 255, 255, 0.7);
 }
 
 button:focus-visible,
 input:focus-visible,
 select:focus-visible,
 textarea:focus-visible {
-  outline: 2px solid rgba(245, 182, 108, 0.8);
+  outline: 2px solid rgba(31, 127, 120, 0.6);
   outline-offset: 2px;
 }
 
