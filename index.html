@@ -1,251 +1,30 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="it">
-  <head>
-    <meta charset="utf-8">
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no"
-    />
-    <meta name="theme-color" content="#f4efe6" />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <meta name="apple-mobile-web-app-title" content="AURA" />
-    <meta name="description" content="AURA: benessere personale con umore, respiro e diario. Tutto locale." />
-    <meta name="color-scheme" content="dark light" />
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+  <meta name="theme-color" content="#95D5B2"/>
+  <link rel="manifest" href="manifest.webmanifest"/>
+  <link rel="icon" href="assets/logo.svg" type="image/svg+xml"/>
+  <link rel="apple-touch-icon" href="assets/icons/icon-192.png"/>
+  <link rel="stylesheet" href="styles.css"/>
+  <title>AURA - Studio Zen</title>
+</head>
+<body>
+  <div id="app" class="app">
+    <main id="view" class="view" aria-live="polite"></main>
 
-    <title>AURA 3.6.0 - Quiet Rituals</title>
+    <nav class="bottombar" aria-label="Navigazione">
+      <a class="tab" href="#/home" data-route="/home" data-icon="home"><span class="tab-icon" aria-hidden="true"></span><span>Casa</span></a>
+      <a class="tab" href="#/checkin" data-route="/checkin" data-icon="checkin"><span class="tab-icon" aria-hidden="true"></span><span>Check-in</span></a>
+      <a class="tab" href="#/breath" data-route="/breath" data-icon="breath"><span class="tab-icon" aria-hidden="true"></span><span>Respiro</span></a>
+      <a class="tab" href="#/journal" data-route="/journal" data-icon="journal"><span class="tab-icon" aria-hidden="true"></span><span>Diario</span></a>
+      <a class="tab" href="#/profile" data-route="/profile" data-icon="profile"><span class="tab-icon" aria-hidden="true"></span><span>Profilo</span></a>
+    </nav>
+  </div>
 
-    <link rel="manifest" href="manifest.webmanifest" />
-    <link rel="icon" href="icons/icon-192.png" />
-    <link rel="apple-touch-icon" href="icons/icon-192.png" />
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Fraunces:wght@400;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap"
-      rel="stylesheet"
-    />
-
-    <link rel="stylesheet" href="css/main.css" />
-  </head>
-
-  <body>
-    <div id="app">
-      <div class="backdrop">
-        <div class="backdropGlow"></div>
-        <div class="backdropGrid"></div>
-        <div class="backdropOrbs"></div>
-      </div>
-
-      <div id="main-ui" class="screen hidden">
-        <header class="topbar">
-          <div class="brand">
-            <div class="brandMark">A</div>
-            <div class="brandText">
-              <div class="brandTitle">AURA</div>
-              <div class="brandSubtitle">Studio di calma</div>
-            </div>
-          </div>
-          <div class="topActions">
-            <button id="btnStats" class="pillBtn" aria-label="Statistiche">Statistiche</button>
-            <button id="btnAudio" class="pillBtn" aria-label="Audio">Audio</button>
-            <button id="btnSettings" class="pillBtn" aria-label="Impostazioni">Impostazioni</button>
-          </div>
-        </header>
-
-        <main class="content">
-          <section class="hero">
-            <div class="heroHeader">
-              <div class="heroTime" id="heroTime">-</div>
-              <div class="heroStreak" id="streakBadge">
-                <span class="heroStreakLabel">Serie</span>
-                <span id="streakCount">0</span>
-              </div>
-            </div>
-            <div class="heroBody">
-              <div class="heroCopy">
-                <div class="heroTitle">
-                  Ciao, <span id="userName">amico</span>
-                </div>
-                <div class="heroSub" id="welcomeSub">Respira con lentezza, scegli una cosa.</div>
-                <button id="bMood" class="ctaBtn">Check-in rapido</button>
-              </div>
-              <div class="heroAvatar">
-                <div class="elfWrap" id="elfWrap">
-                  <div class="glow"></div>
-                  <div class="elf">
-                    <div class="hat"></div>
-                    <div class="face">
-                      <div class="ear l"></div>
-                      <div class="ear r"></div>
-                      <div class="eyes">
-                        <div class="eye"></div>
-                        <div class="eye"></div>
-                      </div>
-                      <div class="mouth"></div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div class="heroCards">
-              <div class="miniCard">
-                <div class="miniLabel">Umore oggi</div>
-                <div class="miniValue" id="todayMoodLabel">Non registrato</div>
-              </div>
-              <div class="miniCard">
-                <div class="miniLabel">Energia</div>
-                <div class="miniValue" id="todayEnergy">-</div>
-              </div>
-              <div class="miniCard">
-                <div class="miniLabel">Diario</div>
-                <div class="miniValue" id="todayJournal">Vuoto</div>
-              </div>
-            </div>
-
-            <div class="heroHint" id="hint">Tocca l'elfo per un consiglio</div>
-          </section>
-
-          <section class="grid">
-            <button id="bBreath" class="cardBtn">
-              <span class="cardTitle">Respiro</span>
-              <span class="cardSub">Sessioni guidate</span>
-            </button>
-            <button id="bAdvice" class="cardBtn">
-              <span class="cardTitle">Consiglio</span>
-              <span class="cardSub">Un gesto gentile</span>
-            </button>
-            <button id="bJournal" class="cardBtn">
-              <span class="cardTitle">Diario</span>
-              <span class="cardSub">Scrittura libera</span>
-            </button>
-            <button id="bJourney" class="cardBtn">
-              <span class="cardTitle">Percorso</span>
-              <span class="cardSub">Il tuo ritmo</span>
-            </button>
-            <button id="bHelp" class="cardBtn">
-              <span class="cardTitle">Guida</span>
-              <span class="cardSub">Mini demo</span>
-            </button>
-            <button id="btnLock" class="cardBtn cardBtnWide">
-              <span class="cardTitle">Blocco</span>
-              <span class="cardSub" id="lockStatus">Disattivato</span>
-            </button>
-          </section>
-        </main>
-
-        <section id="audioPanel" class="audioPanel" aria-label="Pannello audio">
-          <div class="panelHeader">
-            <div>
-              <div class="panelTitle">Ambiente sonoro</div>
-              <div class="panelSub" id="audioStatus">Pronto</div>
-            </div>
-            <div class="panelActions">
-              <button id="audioToggle" class="panelBtn">Avvia</button>
-              <button id="audioClose" class="panelBtn">Chiudi</button>
-            </div>
-          </div>
-          <div class="panelBody">
-            <select id="audioEnv" aria-label="Seleziona ambiente">
-              <option value="forest">Foresta</option>
-              <option value="rain">Pioggia lieve</option>
-              <option value="river">Ruscello</option>
-              <option value="night">Notte stellata</option>
-              <option value="ocean">Oceano lento</option>
-              <option value="thunderstorm">Temporale distante</option>
-              <option value="mountain">Alta quota</option>
-              <option value="insects">Notte estiva</option>
-            </select>
-            <div class="panelRow">
-              <label class="panelLabel">Volume</label>
-              <input id="audioVol" type="range" min="5" max="100" value="40" />
-              <span id="volLbl" class="panelValue">40%</span>
-            </div>
-          </div>
-        </section>
-      </div>
-
-      <div id="auth" class="screen full" style="display: none">
-        <div class="center">
-          <div class="symbol">A</div>
-          <div class="bigTitle serif">AURA</div>
-          <div class="bigSub">Accesso locale, senza server. Registrati o usa la modalita' ospite.</div>
-          <div class="card" style="width: 100%; max-width: 360px; margin-top: 16px">
-            <div class="k">Account locale</div>
-            <div class="tabRow">
-              <button id="authTabLogin" class="ghost" style="flex: 1">Accedi</button>
-              <button id="authTabReg" class="ghost" style="flex: 1">Registrati</button>
-            </div>
-            <div style="margin-top: 12px">
-              <input id="authUser" type="text" placeholder="Email o username" autocomplete="username" maxlength="48" />
-            </div>
-            <div style="margin-top: 10px">
-              <input id="authPass" type="password" placeholder="Password" autocomplete="current-password" maxlength="64" />
-            </div>
-            <div id="authExtra" style="margin-top: 10px; display: none">
-              <input id="authPass2" type="password" placeholder="Ripeti password" autocomplete="new-password" maxlength="64" />
-            </div>
-            <div class="hint" id="authHint" style="margin-top: 10px">Suggerimento: tutto resta in locale.</div>
-            <div style="display: flex; gap: 10px; margin-top: 12px">
-              <button id="authGo" class="primary" style="flex: 1">Continua</button>
-              <button id="authGuest" class="ghost" style="flex: 1">Ospite</button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div id="intro" class="screen full" style="display: none">
-        <div class="center">
-          <div class="symbol">A</div>
-          <div class="bigTitle serif">Benvenuto in AURA</div>
-          <div class="bigSub">
-            Un elfo guida il tuo respiro. Registra l'umore, scrivi e proteggi i tuoi pensieri: <b>tutto resta sul telefono</b>.
-          </div>
-          <div style="width: 100%; max-width: 340px; margin-top: 16px">
-            <input id="nameInput" type="text" placeholder="Come ti chiami?" maxlength="24" />
-          </div>
-          <div style="width: 100%; max-width: 340px; margin-top: 10px">
-            <input id="pinInput" type="password" placeholder="PIN (opzionale)" inputmode="numeric" maxlength="8" />
-            <div class="hint">Cifratura AES-GCM se abiliti il PIN.</div>
-          </div>
-          <div style="display: flex; gap: 10px; width: 100%; max-width: 340px; margin-top: 16px">
-            <button id="introStart" class="primary" style="flex: 1">Inizia</button>
-            <button id="introSkip" class="ghost" style="flex: 1">Salta</button>
-          </div>
-        </div>
-      </div>
-
-      <div id="lock" class="screen full" style="display: none">
-        <div class="center">
-          <div class="symbol">A</div>
-          <div class="bigTitle serif">Sblocco</div>
-          <div class="bigSub">Inserisci il PIN per accedere ai contenuti protetti.</div>
-          <div style="width: 100%; max-width: 300px; margin-top: 16px">
-            <input id="unlockPin" type="password" placeholder="PIN" inputmode="numeric" maxlength="8" />
-            <div id="lockHint" class="hint">I dati restano locali.</div>
-          </div>
-          <div style="display: flex; gap: 10px; width: 100%; max-width: 300px">
-            <button id="unlockBtn" class="primary" style="flex: 1">Sblocca</button>
-          </div>
-        </div>
-      </div>
-
-      <div id="modal" class="overlay" role="dialog" aria-modal="true" style="display: none">
-        <div class="sheet">
-          <div class="sheetHandle"></div>
-          <h2 id="mTitle" style="margin: 0 0 12px 0; font-size: 18px">-</h2>
-          <div id="mBody" class="hint">-</div>
-          <div id="mContent"></div>
-          <div class="sheetActions">
-            <button id="mOk" class="primary" style="flex: 1">Ok</button>
-            <button id="mCancel" class="ghost" style="flex: 1">Chiudi</button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <script src="js/app.js"></script>
-  </body>
+  <script src="app.js"></script>
+</body>
 </html>

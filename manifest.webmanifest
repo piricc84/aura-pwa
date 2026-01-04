@@ -1,37 +1,25 @@
 {
-  "name": "AURA 3.6.0 - Rituals of Calm",
+  "name": "AURA - Studio Zen",
   "short_name": "AURA",
-  "description": "Benessere personale con umore, respiro e diario. Tutto locale.",
-  "start_url": "./",
-  "scope": "./",
+  "start_url": "./#/home",
   "display": "standalone",
-  "orientation": "portrait-primary",
-  "background_color": "#f4efe6",
-  "theme_color": "#f4efe6",
-  "categories": ["health", "wellness"],
-  "screenshots": [
-    {
-      "src": "./icons/icon-192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "form_factor": "narrow"
-    },
-    {
-      "src": "./icons/icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "form_factor": "wide"
-    }
-  ],
+  "background_color": "#F4F7FB",
+  "theme_color": "#95D5B2",
   "icons": [
     {
-      "src": "./icons/icon-192.png",
+      "src": "assets/logo.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "assets/icons/icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "./icons/icon-512.png",
+      "src": "assets/icons/icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
